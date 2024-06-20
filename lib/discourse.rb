@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'cli/ui'
 require 'cli/kit'
 
@@ -5,7 +7,7 @@ CLI::UI::StdoutRouter.enable
 
 module Discourse
   TOOL_NAME = 'discourse'
-  ROOT      = File.expand_path('../..', __FILE__)
+  ROOT      = File.expand_path('..', __dir__)
   LOG_FILE  = '/tmp/discourse.log'
 
   autoload(:EntryPoint, 'discourse/entry_point')

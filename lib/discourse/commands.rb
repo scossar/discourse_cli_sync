@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'discourse'
 
 module Discourse
@@ -6,10 +8,10 @@ module Discourse
 
     def self.register(const, cmd, path)
       autoload(const, path)
-      Registry.add(->() { const_get(const) }, cmd)
+      Registry.add(-> { const_get(const) }, cmd)
     end
 
-    register :Example, 'example', 'discourse/commands/example'
-    register :Help,    'help',    'discourse/commands/help'
+    register :PublishNote, 'publish_note', 'discourse/commands/publish_note'
+    register :Help, 'help', 'discourse/commands/help'
   end
 end

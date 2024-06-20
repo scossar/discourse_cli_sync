@@ -6,9 +6,9 @@ module Discourse
       def call(_args, _name)
         puts 'neato'
 
-        if rand < 0.05
-          raise(CLI::Kit::Abort, "you got unlucky!")
-        end
+        return unless rand < 0.05
+
+        raise(CLI::Kit::Abort, 'you got unlucky!')
       end
 
       def self.help
