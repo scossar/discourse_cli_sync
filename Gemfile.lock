@@ -1,0 +1,34 @@
+GEM
+  remote: https://rubygems.org/
+  specs:
+    ansi (1.5.0)
+    builder (3.3.0)
+    cli-kit (5.0.0)
+      cli-ui (~> 2.0)
+    cli-ui (2.2.3)
+    metaclass (0.0.4)
+    minitest (5.24.0)
+    minitest-reporters (1.7.1)
+      ansi
+      builder
+      minitest (>= 5.0)
+      ruby-progressbar
+    mocha (1.5.0)
+      metaclass (~> 0.0.1)
+    ruby-progressbar (1.13.0)
+    yard (0.8.7.6)
+
+PLATFORMS
+  ruby
+  x86_64-linux
+
+DEPENDENCIES
+  cli-kit (~> 5.0.0)
+  cli-ui (~> 2.2.3)
+  minitest (>= 5.0.0)
+  minitest-reporters
+  mocha (~> 1.5.0)
+  yard (~> 0.8.7.6)
+
+BUNDLED WITH
+   2.5.11
