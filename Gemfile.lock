@@ -15,8 +15,14 @@ GEM
       ruby-progressbar
     mocha (1.5.0)
       metaclass (~> 0.0.1)
+    msgpack (1.7.2)
+    multi_json (1.15.0)
+    neovim (0.10.0)
+      msgpack (~> 1.1)
+      multi_json (~> 1.0)
+    rake (13.2.1)
     ruby-progressbar (1.13.0)
-    yard (0.8.7.6)
+    yard (0.9.36)
 
 PLATFORMS
   ruby
@@ -28,7 +34,9 @@ DEPENDENCIES
   minitest (>= 5.0.0)
   minitest-reporters
   mocha (~> 1.5.0)
-  yard (~> 0.8.7.6)
+  neovim
+  rake (~> 13.0, >= 13.0.6)
+  yard (~> 0.9.36)
 
 BUNDLED WITH
    2.5.11

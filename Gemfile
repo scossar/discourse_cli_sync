@@ -4,7 +4,12 @@ source 'https://rubygems.org'
 
 gem 'cli-kit', '~> 5.0.0'
 gem 'cli-ui', '~> 2.2.3'
-gem 'yard', '~> 0.8.7.6'
+gem 'rake', '~> 13.0', '>= 13.0.6'
+
+group :development do
+  gem 'neovim'
+  gem 'yard', '~> 0.9.36'
+end
 
 group :test do
   gem 'minitest', '>= 5.0.0', require: false
