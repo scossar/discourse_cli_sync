@@ -5,7 +5,6 @@ require_relative 'test_helper'
 module Discourse
   class ExampleTest < Minitest::Test
     include CLI::Kit::Support::TestHelper
-
     def test_example
       CLI::Kit::System.fake('ls -al', stdout: "a\nb", success: true)
 
