@@ -5,12 +5,12 @@ module Discourse
     class DiscourseConfig
       class << self
         def call
-          check_config
+          check_credentials
         end
 
         private
 
-        def check_config
+        def check_credentials
           discourse_username = Discourse::Config.get('credentials', 'discourse_username')
 
           return if discourse_username

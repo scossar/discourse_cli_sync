@@ -30,6 +30,15 @@ module Discourse
 
         assert_equal 'scossar', Discourse::Config.get('credentials', 'discourse_username')
       end
+
+      def test_vault_dir_not_set
+        CLI::UI::Prompt.expects(:ask).with("What's the directory of your Obsidian Vault?")
+                       .returns('~/Vault')
+
+        Discourse::Utils::DiscourseConfig.call
+
+        assert_equal '~/Vault', DiscourseConfig.get('vault', 'vault_dir')
+      end
     end
   end
 end
