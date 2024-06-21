@@ -12,10 +12,12 @@ module Discourse
       def setup
         super
         Discourse::Config.set('credentials', 'discourse_username', nil)
+        Discourse::Config.set('vault', 'vault_dir', nil)
       end
 
       def test_username_not_set
-        CLI::UI::Prompt.expects(:ask).with("What's your Discourse username?").returns('scossar')
+        mock_discourse_prompt('scossar')
+        mock_vault_prompt('~/Vault')
 
         Discourse::Utils::DiscourseConfig.call
 
@@ -25,6 +27,7 @@ module Discourse
       def test_username_set
         Discourse::Config.set('credentials', 'discourse_username', 'scossar')
         CLI::UI::Prompt.expects(:ask).with("What's your Discourse username?").never
+        mock_vault_prompt('~/Vault')
 
         Discourse::Utils::DiscourseConfig.call
 
@@ -32,12 +35,34 @@ module Discourse
       end
 
       def test_vault_dir_not_set
-        CLI::UI::Prompt.expects(:ask).with("What's the directory of your Obsidian Vault?")
-                       .returns('~/Vault')
+        mock_discourse_prompt('scossar')
+        mock_vault_prompt('~/Vault')
 
         Discourse::Utils::DiscourseConfig.call
 
-        assert_equal '~/Vault', DiscourseConfig.get('vault', 'vault_dir')
+        assert_equal '~/Vault', Discourse::Config.get('vault', 'vault_dir')
+      end
+
+      def test_vault_dir_set
+        Discourse::Config.set('vault', 'vault_dir', '~/Vault')
+        CLI::UI::Prompt.expects(:ask).with('What directory is your Obsidian Vault in?').never
+        mock_discourse_prompt('scossar')
+
+        Discourse::Utils::DiscourseConfig.call
+
+        assert_equal '~/Vault', Discourse::Config.get('vault', 'vault_dir')
+      end
+
+      private
+
+      def mock_discourse_prompt(return_value)
+        CLI::UI::Prompt.expects(:ask).with("What's your Discourse username?")
+                       .returns(return_value).at_least_once
+      end
+
+      def mock_vault_prompt(return_value)
+        CLI::UI::Prompt.expects(:ask).with('What directory is your Obsidian Vault in?')
+                       .returns(return_value).at_least_once
       end
     end
   end
