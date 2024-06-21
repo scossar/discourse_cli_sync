@@ -5,27 +5,39 @@ module Discourse
     class DiscourseConfig
       class << self
         def call
-          check_discourse_credentials
-          check_vault_credentials
+          discourse_credentials
+          vault_credentials
         end
 
         private
 
-        def check_discourse_credentials
+        def discourse_credentials
           discourse_username = Discourse::Config.get('credentials', 'discourse_username')
 
-          return if discourse_username
+          unless discourse_username
+            loop do
+              discourse_username = CLI::UI::Prompt.ask("What's your Discourse username?")
 
-          discourse_username = CLI::UI::Prompt.ask("What's your Discourse username?")
+              confirm = CLI::UI::Prompt.confirm("Confirm that #{discourse_username} is correct")
+
+              break if confirm
+            end
+          end
+
           Discourse::Config.set('credentials', 'discourse_username', discourse_username)
         end
 
-        def check_vault_credentials
+        def vault_credentials
           vault_dir = Discourse::Config.get('vault', 'vault_dir')
 
-          return if vault_dir
+          unless vault_dir
+            loop do
+              vault_dir = CLI::UI::Prompt.ask('What directory is your Obsidian Vault in?')
+              confirm = CLI::UI::Prompt.confirm("Confirm that #{vault_dir} is correct")
 
-          vault_dir = CLI::UI::Prompt.ask('What directory is your Obsidian Vault in?')
+              break if confirm
+            end
+          end
           Discourse::Config.set('vault', 'vault_dir', vault_dir)
         end
       end
