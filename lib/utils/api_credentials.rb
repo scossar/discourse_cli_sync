@@ -15,8 +15,8 @@ module Discourse
 
           unless encrypted_key
             loop do
-              encrypted_key = CLI::UI::Prompt.ask_password('API Key')
-              confirm = CLI::UI::Prompt.confirm('Was that correct?')
+              encrypted_key = CLI::UI::Prompt.ask_password('Enter your Discourse API key')
+              confirm = CLI::UI::Prompt.confirm('Is that correct?')
 
               break if confirm
             end
