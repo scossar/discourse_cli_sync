@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative 'ask_password'
 require_relative 'encryption'
 
 module Discourse
@@ -14,14 +15,11 @@ module Discourse
           iv, salt, encrypted_key = credentials
           return if iv && salt && encrypted_key
 
-          password = CLI::UI::Prompt
-                     .ask_password('Password to use for API Key encryption?')
-          password_confirm = CLI::UI::Prompt.ask_password('Enter encryption password again')
-          throw new StandardError "Passwords don't match" unless password == password_confirm
-
+          password = AskPassword.ask_and_confirm_password('Password to encrypt API Key',
+                                                          'Confirm password')
           unencrypted_key, key_start = nil
           loop do
-            unencrypted_key = CLI::UI::Prompt.ask('Your Discourse API key')
+            unencrypted_key = CLI::UI::Prompt.ask_password('Your Discourse API key')
             key_start = unencrypted_key[0, 4]
             confirm = CLI::UI::Prompt
                       .confirm("Confirm that the key starting with #{key_start} is correct")

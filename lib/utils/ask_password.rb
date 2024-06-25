@@ -12,7 +12,7 @@ module Discourse
         loop do
           password = CLI::UI::Prompt.ask_password(prompt)
           password_confirm = CLI::UI::Prompt.ask_password(confirm_prompt)
-          break if password == password_confirm
+          return password if password == password_confirm
 
           CLI::UI::Format "The passwords didn't match. Please try again."
         end
