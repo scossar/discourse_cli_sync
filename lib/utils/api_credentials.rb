@@ -8,7 +8,6 @@ module Discourse
       class << self
         def call
           confirm_api_config
-          display_unencrypted_key
         end
 
         def confirm_api_config
@@ -35,14 +34,6 @@ module Discourse
           Discourse::Config.set('api', 'iv', iv)
           Discourse::Config.set('api', 'salt', salt)
           Discourse::Config.set('api', 'encrypted_key', encrypted_key)
-        end
-
-        def display_unencrypted_key
-          iv, salt, encrypted_key = credentials
-          password = CLI::UI::Prompt
-                     .ask_password('API Key password')
-          unencrypted_key = Encryption.decrypt(password, salt, iv, encrypted_key)
-          puts "unencrypted_key: #{unencrypted_key}"
         end
 
         def credentials
