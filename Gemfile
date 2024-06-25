@@ -2,6 +2,7 @@
 
 source 'https://rubygems.org'
 
+gem 'base64', '~> 0.2.0'
 gem 'cli-kit', '~> 5.0.0'
 gem 'cli-ui', '~> 2.2.3'
 gem 'rake', '~> 13.0', '>= 13.0.6'

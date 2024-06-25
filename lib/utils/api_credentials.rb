@@ -7,19 +7,16 @@ module Discourse
     class ApiCredentials
       class << self
         def call
-          encrypted_key = Discourse::Config.get('api', 'encrypted_key')
           initialization_vector = Discourse::Config.get('api', 'iv')
+          salt = Discourse::Config.get('api', 'salt')
+          encrypted_key = Discourse::Config.get('api', 'encrypted_key')
 
-          return if encrypted_key && initialization_vector
+          return if initialization_vector && salt && encrypted_key
 
-          encryption_password = CLI::UI::Prompt
-                                .ask('Password to use for API Key encryption?')
-          password_confirm = CLI::UI::Prompt.ask('Enter encryption password again')
-          unless encryption_password == password_confirm
-            throw new StandardError "Passwords don't match"
-          end
-
-          cipher_key = Encryption.cipher_key_from_password(encryption_password)
+          password = CLI::UI::Prompt
+                     .ask_password('Password to use for API Key encryption?')
+          password_confirm = CLI::UI::Prompt.ask_password('Enter encryption password again')
+          throw new StandardError "Passwords don't match" unless password == password_confirm
 
           unencrypted_key, key_start = nil
           loop do
@@ -31,11 +28,11 @@ module Discourse
             break if confirm
           end
 
-          puts "unencrypted_key: #{unencrypted_key}, cipher_key: #{cipher_key}"
-          encrypted_key, iv = Encryption.encrypt_api_key(unencrypted_key, cipher_key)
+          iv, salt, encrypted_key = Encryption.encrypt(password, unencrypted_key)
 
-          Discourse::Config.set('api', 'encrypted_key', encrypted_key)
           Discourse::Config.set('api', 'iv', iv)
+          Discourse::Config.set('api', 'salt', salt)
+          Discourse::Config.set('api', 'encrypted_key', encrypted_key)
         end
       end
     end

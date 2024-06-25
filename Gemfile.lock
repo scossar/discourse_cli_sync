@@ -2,6 +2,7 @@ GEM
   remote: https://rubygems.org/
   specs:
     ansi (1.5.0)
+    base64 (0.2.0)
     builder (3.3.0)
     cli-kit (5.0.0)
       cli-ui (~> 2.0)
@@ -29,6 +30,7 @@ PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  base64 (~> 0.2.0)
   cli-kit (~> 5.0.0)
   cli-ui (~> 2.2.3)
   minitest (>= 5.0.0)
