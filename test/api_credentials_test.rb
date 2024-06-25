@@ -26,9 +26,6 @@ module Discourse
         CLI::UI::Prompt.expects(:confirm).with(confirm_question).returns(true).at_least_once
 
         Discourse::Utils::ApiCredentials.call
-
-        # Not testing the saved value of the key here. Users will supply the unencrypted key, the key will
-        # then be encrypted and saved.
       end
 
       def test_api_key_encrypted
