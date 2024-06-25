@@ -7,11 +7,13 @@ module Discourse
     class ApiCredentials
       class << self
         def call
-          initialization_vector = Discourse::Config.get('api', 'iv')
-          salt = Discourse::Config.get('api', 'salt')
-          encrypted_key = Discourse::Config.get('api', 'encrypted_key')
+          confirm_api_config
+          display_unencrypted_key
+        end
 
-          return if initialization_vector && salt && encrypted_key
+        def confirm_api_config
+          iv, salt, encrypted_key = credentials
+          return if iv && salt && encrypted_key
 
           password = CLI::UI::Prompt
                      .ask_password('Password to use for API Key encryption?')
@@ -33,6 +35,21 @@ module Discourse
           Discourse::Config.set('api', 'iv', iv)
           Discourse::Config.set('api', 'salt', salt)
           Discourse::Config.set('api', 'encrypted_key', encrypted_key)
+        end
+
+        def display_unencrypted_key
+          iv, salt, encrypted_key = credentials
+          password = CLI::UI::Prompt
+                     .ask_password('API Key password')
+          unencrypted_key = Encryption.decrypt(password, salt, iv, encrypted_key)
+          puts "unencrypted_key: #{unencrypted_key}"
+        end
+
+        def credentials
+          iv = Discourse::Config.get('api', 'iv')
+          salt = Discourse::Config.get('api', 'salt')
+          encrypted_key = Discourse::Config.get('api', 'encrypted_key')
+          [iv, salt, encrypted_key]
         end
       end
     end
