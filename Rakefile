@@ -47,6 +47,37 @@ namespace :db do
     puts "Created migration #{migration_file}"
   end
 
+  desc 'Drop the database'
+  task :drop do
+    env = ENV['APP_ENV'] || 'development'
+    db_config = YAML.load_file('config/database.yml')
+    db_file = db_config[env]['database']
+
+    files_to_delete = [db_file, "#{db_file}-shm", "#{db_file}-wal"]
+
+    files_to_delete.each do |file|
+      if File.exist?(file)
+        File.delete(file)
+        puts "Deleted file #{file}"
+      else
+        puts "File #{file} does not exist"
+      end
+    end
+
+    schema_file = 'db/schema.rb'
+    if File.exist?(schema_file)
+      File.delete(schema_file)
+      puts "Deleted schema file #{schema_file}"
+    else
+      puts "Schema file #{schema_file} does not exist"
+    end
+  end
+
+  desc 'Reset the database'
+  task reset: %i[drop migrate] do # NOTE: the seed task could be added here
+    puts 'Database reset completed'
+  end
+
   # not being used, but will keep for reference
   desc 'Seed the database'
   task seed: :load_config do
