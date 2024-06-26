@@ -24,12 +24,14 @@ GEM
     cli-kit (5.0.0)
       cli-ui (~> 2.0)
     cli-ui (2.2.3)
+    coderay (1.1.3)
     concurrent-ruby (1.3.3)
     connection_pool (2.4.1)
     drb (2.2.1)
     i18n (1.14.5)
       concurrent-ruby (~> 1.0)
     metaclass (0.0.4)
+    method_source (1.1.0)
     mini_portile2 (2.8.7)
     minitest (5.24.0)
     minitest-reporters (1.7.1)
@@ -45,6 +47,9 @@ GEM
     neovim (0.10.0)
       msgpack (~> 1.1)
       multi_json (~> 1.0)
+    pry (0.14.2)
+      coderay (~> 1.1)
+      method_source (~> 1.0)
     rake (13.2.1)
     ruby-progressbar (1.13.0)
     sqlite3 (1.7.3)
@@ -68,6 +73,7 @@ DEPENDENCIES
   minitest-reporters
   mocha (~> 1.5.0)
   neovim
+  pry
   rake (~> 13.0, >= 13.0.6)
   sqlite3 (~> 1.4)
   yard (~> 0.9.36)

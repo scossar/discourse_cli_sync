@@ -1,0 +1,11 @@
+#!/usr/bin/env ruby
+
+require 'bundler/setup'
+require 'pry'
+require_relative '../config/initializers/active_record'
+
+# Require all models
+Dir[File.join(__dir__, '../lib/models/*.rb')].each { |file| require file }
+
+# Start a Pry session
+Pry.start
