@@ -11,7 +11,9 @@ module Discourse
 
       def setup
         super
-        Discourse::Config.set('credentials', 'encrypted_api_key', nil)
+        Discourse::Config.set('api', 'iv', nil)
+        Discourse::Config.set('api', 'salt', nil)
+        Discourse::Config.set('api', 'encrypted_key', nil)
       end
 
       def skip_test_api_key_set
@@ -21,29 +23,27 @@ module Discourse
         Discourse::Utils::ApiCredentials.call
       end
 
-      def test_api_key_not_set
-        CLI::UI::Prompt.expects(:ask_password).with(api_key_question).returns(api_key).at_least_once
-        CLI::UI::Prompt.expects(:confirm).with(confirm_question).returns(true).at_least_once
+      def api_credentials_set
+        Discourse::Config.set('api', 'iv', '/rWG62wumQw0Na7nZkg9Lw==')
+        Discourse::Config.set('api', 'salt', '/rWG62wumQw0Na7nZkg9Lw==')
+        Discourse::Config.set('api', 'encrypted_key',
+                              'HQJ08bBSizNSv/SDHN9F4EZMH0eqEHzNabkc4SskIjw=')
+
+        CLI::UI::Prompt.expects(:ask_password).with(Discourse::Utils::ApiCredentials
+          .ask_password_question).never
+        CLI::UI::Prompt.expects(:confirm).with(Discourse::Utils::ApiCredentials
+          .ask_password_confirm).never
+        CLI::UI::Prompt.expects(:ask_password).with(Discourse::Utils::ApiCredentials
+          .ask_api_key_question).never
+        CLI::UI::Prompt.expects(:confirm).never
 
         Discourse::Utils::ApiCredentials.call
-      end
-
-      def test_api_key_encrypted
-        # encrypt the key
       end
 
       private
 
       def api_key
         '01234567' * 4
-      end
-
-      def api_key_question
-        'Enter your Discourse API key'
-      end
-
-      def confirm_question
-        'Is that correct?'
       end
     end
   end

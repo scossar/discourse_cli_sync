@@ -11,6 +11,7 @@ AllCops:
     - "bin/**/*"
     - "db/**/*"
     - "Rakefile"
+    - "test/**/*"
 
 Style/Documentation:
   Enabled: false
@@ -21,6 +22,7 @@ Layout/LineLength:
 Metrics/BlockLength:
   Exclude:
     - "spec/**/*.rb"
+    - "test/**/*"
 
 Metrics/MethodLength:
   Max: 20
