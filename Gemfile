@@ -2,10 +2,12 @@
 
 source 'https://rubygems.org'
 
+gem 'activerecord', '~> 7.1', '>= 7.1.3.4'
 gem 'base64', '~> 0.2.0'
 gem 'cli-kit', '~> 5.0.0'
 gem 'cli-ui', '~> 2.2.3'
 gem 'rake', '~> 13.0', '>= 13.0.6'
+gem 'sqlite3', '~> 1.4'
 
 group :development do
   gem 'neovim'
