@@ -22,6 +22,10 @@ module Discourse
           'Password to encrypt API Key'
         end
 
+        def mismatch_prompt
+          'Passwords did not match. Please try again.'
+        end
+
         def ask_password_confirm
           'Confirm password'
         end
@@ -41,6 +45,7 @@ module Discourse
           return if iv && salt && encrypted_key
 
           password = AskPassword.ask_and_confirm_password(ask_password_question,
+                                                          mismatch_prompt,
                                                           ask_password_confirm)
           api_key_prompt(password)
         end
