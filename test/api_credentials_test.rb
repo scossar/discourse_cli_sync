@@ -2,6 +2,7 @@
 
 require_relative 'test_helper'
 require_relative '../lib/utils/api_credentials'
+require_relative '../lib/utils//api_key'
 require_relative '../lib/utils/ask_password'
 
 module Discourse
@@ -50,6 +51,9 @@ module Discourse
                        .returns(true).once
 
         Discourse::Utils::ApiCredentials.call
+
+        unencoded_api_key = Discourse::Utils::ApiKey.api_key('simplepass')
+        assert_equal api_key, unencoded_api_key
       end
 
       private
