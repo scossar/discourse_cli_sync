@@ -7,7 +7,7 @@ module Discourse
   module Commands
     class PublishNote < Discourse::Command
       def call(_args, _name)
-        # Discourse::Utils::DiscourseConfig.call
+        Discourse::Utils::DiscourseConfig.call
         Discourse::Utils::ApiCredentials.call
       end
 
