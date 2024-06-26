@@ -11,6 +11,7 @@ module Discourse
 
       def setup
         super
+        Discourse::Config.set('discourse', 'base_url', nil)
         Discourse::Config.set('credentials', 'discourse_username', nil)
         Discourse::Config.set('vault', 'vault_dir', nil)
       end
