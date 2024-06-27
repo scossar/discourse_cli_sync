@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
+require 'dotenv'
+
 require_relative 'api_credentials'
 require_relative 'encryption'
+
+Dotenv.load
 
 module Discourse
   module Utils

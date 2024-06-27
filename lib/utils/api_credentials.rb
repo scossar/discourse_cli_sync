@@ -1,7 +1,11 @@
 # frozen_string_literal: true
 
+require 'dotenv'
+
 require_relative 'ask_password'
 require_relative 'encryption'
+
+Dotenv.load
 
 module Discourse
   module Utils
@@ -12,9 +16,9 @@ module Discourse
         end
 
         def credentials
-          iv = Discourse::Config.get('api', 'iv')
-          salt = Discourse::Config.get('api', 'salt')
-          encrypted_key = Discourse::Config.get('api', 'encrypted_key')
+          iv = ENV.fetch('IV', nil)
+          salt = ENV.fetch('SALT', nil)
+          encrypted_key = ENV.fetch('ENCRYPTED_KEY', nil)
           [iv, salt, encrypted_key]
         end
 
@@ -63,9 +67,16 @@ module Discourse
 
           iv, salt, encrypted_key = Encryption.encrypt(password, unencrypted_key)
 
-          Discourse::Config.set('api', 'iv', iv)
-          Discourse::Config.set('api', 'salt', salt)
-          Discourse::Config.set('api', 'encrypted_key', encrypted_key)
+          write_to_env('IV', iv)
+          write_to_env('SALT', salt)
+          write_to_env('ENCRYPTED_KEY', encrypted_key)
+        end
+
+        def write_to_env(key, value)
+          file_path = File.join(Dir.pwd, '.env')
+          File.open(file_path, 'a') do |file|
+            file.puts "#{key}=\"#{value}\""
+          end
         end
       end
     end
