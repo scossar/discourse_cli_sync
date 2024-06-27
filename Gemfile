@@ -9,6 +9,7 @@ gem 'cli-ui', '~> 2.2.3'
 gem 'faraday', '~> 2.7', '>= 2.9.1'
 gem 'faraday-follow_redirects', '~> 0.3.0'
 gem 'faraday-multipart', '~> 1.0', '>= 1.0.4'
+gem 'mime-types', '~> 3.1', require: 'mime/types/full'
 
 gem 'rake', '~> 13.0', '>= 13.0.6'
 gem 'sqlite3', '~> 1.4'

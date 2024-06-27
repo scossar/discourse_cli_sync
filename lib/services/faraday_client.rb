@@ -6,7 +6,7 @@ module Discourse
 
     def initialize(api_key)
       @api_username = Discourse::Config.get('credentials', 'discourse_username')
-      @base_url = Discourse::Config.get('discourse', 'base_url')
+      @base_url = Discourse::Config.get('discourse_site', 'base_url')
       @api_key = api_key
     end
   end
