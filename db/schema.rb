@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_26_220411) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_27_090543) do
   create_table "directories", force: :cascade do |t|
     t.string "path", null: false
     t.string "archetype", default: "regular", null: false
@@ -42,6 +42,15 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_26_220411) do
     t.index ["discourse_post_id"], name: "index_discourse_topics_on_discourse_post_id", unique: true
     t.index ["discourse_url"], name: "index_discourse_topics_on_discourse_url", unique: true
     t.index ["note_id"], name: "index_discourse_topics_on_note_id"
+  end
+
+  create_table "encrypted_credentials", force: :cascade do |t|
+    t.string "encrypted_api_key", null: false
+    t.string "salt", null: false
+    t.string "iv", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "base_url", null: false
   end
 
   create_table "notes", force: :cascade do |t|

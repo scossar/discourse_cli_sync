@@ -4,6 +4,7 @@ require 'dotenv'
 
 require_relative 'ask_password'
 require_relative 'encryption'
+require_relative '../models/encrypted_credential'
 
 Dotenv.load overwrite: true
 
@@ -16,10 +17,15 @@ module Discourse
         end
 
         def credentials
-          iv = ENV.fetch('IV', nil)
-          salt = ENV.fetch('SALT', nil)
-          encrypted_key = ENV.fetch('ENCRYPTED_KEY', nil)
-          [iv, salt, encrypted_key]
+          base_url = Discourse::Config.get('discourse_site', 'base_url')
+          # TODO: throw error if not set?
+          encrypted_credentials = EncryptedCredential.find_by(base_url:)
+          return [null, null, null] unless encrypted_credentials
+
+          iv = encrypted_credentials.iv
+          salt = encrypted_credentials.salt
+          encrypted_api_key = encrypted_credentials.encrypted_api_key
+          [iv, salt, encrypted_api_key]
         end
 
         def ask_password_question
@@ -65,11 +71,10 @@ module Discourse
             break if confirm
           end
 
-          iv, salt, encrypted_key = Encryption.encrypt(password, unencrypted_key)
+          iv, salt, encrypted_api_key = Encryption.encrypt(password, unencrypted_key)
 
-          write_to_env('IV', iv)
-          write_to_env('SALT', salt)
-          write_to_env('ENCRYPTED_KEY', encrypted_key)
+          base_url = Discourse::Config.get('discourse_site', 'base_url')
+          EncryptedCredential.create(base_url:, iv:, salt:, encrypted_api_key:)
         end
 
         def write_to_env(key, value)
