@@ -5,7 +5,7 @@ require 'dotenv'
 require_relative 'ask_password'
 require_relative 'encryption'
 
-Dotenv.load
+Dotenv.load overwrite: true
 
 module Discourse
   module Utils
