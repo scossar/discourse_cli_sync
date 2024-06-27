@@ -11,12 +11,14 @@ module Discourse
 
       def setup
         super
-        Discourse::Config.set('discourse', 'base_url', nil)
+        Discourse::Config.set('discourse_site', 'base_url', nil)
         Discourse::Config.set('credentials', 'discourse_username', nil)
         Discourse::Config.set('vault', 'vault_dir', nil)
       end
 
-      def test_username_not_set
+      def test_unconfigured
+        mock_base_url_prompt('https://discourse.example.com')
+        mock_base_url_confirm('https://discourse.example.com')
         mock_username_prompt('scossar')
         mock_username_confirm('scossar')
         mock_vault_prompt('~/Vault')
@@ -30,8 +32,10 @@ module Discourse
       def test_username_set
         Discourse::Config.set('credentials', 'discourse_username', 'scossar')
 
-        CLI::UI::Prompt.expects(:ask).with("What's your Discourse username?").never
-        CLI::UI::Prompt.expects(:confirm).with('Confirm that scossar is correct').never
+        mock_base_url_prompt('https://discourse.example.com')
+        mock_base_url_confirm('https://discourse.example.com')
+        CLI::UI::Prompt.expects(:ask).with(Discourse::Utils::DiscourseConfig.discourse_username_prompt).never
+        CLI::UI::Prompt.expects(:confirm).with(Discourse::Utils::DiscourseConfig.discourse_username_confirm('scossar')).never
         mock_vault_prompt('~/Vault')
         mock_vault_confirm('~/Vault')
 
@@ -41,6 +45,8 @@ module Discourse
       end
 
       def test_vault_dir_not_set
+        mock_base_url_prompt('https://discourse.example.com')
+        mock_base_url_confirm('https://discourse.example.com')
         mock_username_prompt('scossar')
         mock_username_confirm('scossar')
         mock_vault_prompt('~/Vault')
@@ -52,11 +58,13 @@ module Discourse
       end
 
       def test_vault_dir_set
-        Discourse::Config.set('vault', 'vault_dir', '~/Vault')
-        CLI::UI::Prompt.expects(:ask).with('What directory is your Obsidian Vault in?').never
+        mock_base_url_prompt('https://discourse.example.com')
+        mock_base_url_confirm('https://discourse.example.com')
         mock_username_prompt('scossar')
         mock_username_confirm('scossar')
-        CLI::UI::Prompt.expects(:confirm).with('Confirm that ~/Vault is correct').never
+        Discourse::Config.set('vault', 'vault_dir', '~/Vault')
+        CLI::UI::Prompt.expects(:ask).with(Discourse::Utils::DiscourseConfig.vault_dir_prompt).never
+        CLI::UI::Prompt.expects(:confirm).with(Discourse::Utils::DiscourseConfig.vault_dir_confirm('~/Vault')).never
 
         Discourse::Utils::DiscourseConfig.call
 
@@ -65,23 +73,33 @@ module Discourse
 
       private
 
+      def mock_base_url_prompt(base_url)
+        CLI::UI::Prompt.expects(:ask).with(Discourse::Utils::DiscourseConfig.base_url_prompt)
+                       .returns(base_url).at_least_once
+      end
+
+      def mock_base_url_confirm(base_url)
+        CLI::UI::Prompt.expects(:confirm).with(Discourse::Utils::DiscourseConfig.base_url_confirm(base_url))
+                       .returns(true).at_least_once
+      end
+
       def mock_username_prompt(return_value)
-        CLI::UI::Prompt.expects(:ask).with("What's your Discourse username?")
+        CLI::UI::Prompt.expects(:ask).with(Discourse::Utils::DiscourseConfig.discourse_username_prompt)
                        .returns(return_value).at_least_once
       end
 
       def mock_username_confirm(username)
-        CLI::UI::Prompt.expects(:confirm).with("Confirm that #{username} is correct")
+        CLI::UI::Prompt.expects(:confirm).with(Discourse::Utils::DiscourseConfig.discourse_username_confirm(username))
                        .returns(true).at_least_once
       end
 
       def mock_vault_prompt(return_value)
-        CLI::UI::Prompt.expects(:ask).with('What directory is your Obsidian Vault in?')
+        CLI::UI::Prompt.expects(:ask).with(Discourse::Utils::DiscourseConfig.vault_dir_prompt)
                        .returns(return_value).at_least_once
       end
 
       def mock_vault_confirm(vault)
-        CLI::UI::Prompt.expects(:confirm).with("Confirm that #{vault} is correct")
+        CLI::UI::Prompt.expects(:confirm).with(Discourse::Utils::DiscourseConfig.vault_dir_confirm(vault))
                        .returns(true).at_least_once
       end
     end

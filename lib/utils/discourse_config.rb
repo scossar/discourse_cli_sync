@@ -37,7 +37,7 @@ module Discourse
         private
 
         def discourse_site
-          base_url = Discourse::Config.get('discourse', 'base_url')
+          base_url = Discourse::Config.get('discourse_site', 'base_url')
 
           unless base_url
             loop do
@@ -49,7 +49,7 @@ module Discourse
             end
           end
 
-          Discourse::Config.set('discourse', 'base_url', base_url)
+          Discourse::Config.set('discourse_site', 'base_url', base_url)
         end
 
         def discourse_credentials
