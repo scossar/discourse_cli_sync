@@ -4,6 +4,8 @@ require_relative 'ask_password'
 require_relative 'encryption'
 require_relative '../models/encrypted_credential'
 
+require_relative 'logger'
+
 module Discourse
   module Utils
     class ApiCredentials
@@ -33,6 +35,7 @@ module Discourse
         end
 
         def credentials(host)
+          Logger.debug("in the credentials method for host #{host}")
           encrypted_credentials = EncryptedCredential.find_by(host:)
 
           [nil, nil, nil] unless encrypted_credentials

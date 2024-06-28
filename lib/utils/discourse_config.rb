@@ -79,7 +79,7 @@ module Discourse
 
           if vault_dir
             loop do
-              confirm = ask(vault_dir_confirm_prompt(host, vault_dir))
+              confirm = confirm(vault_dir_confirm_prompt(host, vault_dir))
               break if confirm
 
               vault_dir = ask(vault_dir_prompt(host))
