@@ -8,8 +8,8 @@ require_relative 'faraday_client'
 
 module Discourse
   class DiscourseRequest
-    def initialize
-      @faraday_client = FaradayClient.new
+    def initialize(host, api_key)
+      @faraday_client = FaradayClient.new(host, api_key)
     end
 
     def create_topic(title:, markdown:, category:)

@@ -4,12 +4,14 @@ require_relative '../../utils/api_credentials'
 require_relative '../../utils/api_key'
 require_relative '../../utils/ask_password'
 require_relative '../../utils/discourse_config'
+require_relative '../../services/discourse_category_fetcher'
 
 module Discourse
   module Commands
     class PublishNote < Discourse::Command
       def call(_args, _name)
-        credential_frames
+        host, _password, api_key = credential_frames
+        site_info_frame(host, api_key)
       end
 
       def self.help
@@ -22,8 +24,14 @@ module Discourse
           password = Discourse::Utils::ApiCredentials.call(host)
           password ||= Discourse::Utils::AskPassword.ask_password('Your API key password')
           api_key = Discourse::Utils::ApiKey.api_key(host, password)
-          puts "API KEY: #{api_key}"
           [host, password, api_key]
+        end
+      end
+
+      def site_info_frame(host, api_key)
+        CLI::UI::Frame.open('Discourse info') do
+          category_fetcher = DiscourseCategoryFetcher.new(host, api_key)
+          puts category_fetcher.categories
         end
       end
     end
