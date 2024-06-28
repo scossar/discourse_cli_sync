@@ -3,11 +3,11 @@
 module Discourse
   class DiscourseTopic < ActiveRecord::Base
     belongs_to :note
-    has_one :directory, through: :note
-    has_one :discourse_category, through: :directory
+    belongs_to :discourse_category, optional: true
 
-    validates :discourse_url, presence: true, uniqueness: true
-    validates :discourse_id, presence: true, uniqueness: true
-    validates :discourse_post_id, presence: true, uniqueness: true
+    validates :url, presence: true, uniqueness: true
+    validates :topic_id, presence: true, uniqueness: true
+    validates :post_id, presence: true, uniqueness: true
+    validates :archetype, presence: true, inclusion: { in: %w[regular private_message] }
   end
 end
