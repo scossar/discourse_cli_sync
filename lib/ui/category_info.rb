@@ -37,6 +37,7 @@ module Discourse
         rows << [name, read_restricted, description]
       end
 
+      # TODO: be careful with this. Have a look at CLI::UI::Terminal for ideas
       table = Terminal::Table.new(headings: ['Name', 'Read Restricted', 'Description'],
                                   rows:)
       table.style = { border: :unicode_round }
