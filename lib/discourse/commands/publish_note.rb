@@ -11,7 +11,7 @@ module Discourse
     class PublishNote < Discourse::Command
       def call(_args, _name)
         host, _password, api_key = credential_frames
-        site_info_frame(host, api_key)
+        _categories, _category_names = site_info_frame(host, api_key)
       end
 
       def self.help
@@ -30,7 +30,8 @@ module Discourse
 
       def site_info_frame(host, api_key)
         CLI::UI::Frame.open('Discourse info') do
-          Discourse::UI.category_loader(host, api_key)
+          categories, category_names = Discourse::UI.category_loader(host, api_key)
+          [categories, category_names]
         end
       end
     end
