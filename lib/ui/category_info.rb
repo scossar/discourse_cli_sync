@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'terminal-table'
-
 require_relative '../services/discourse_category_fetcher'
 
 module Discourse
@@ -23,7 +21,10 @@ module Discourse
 
       spin_group.wait
 
-      category_info(categories)
+      info = category_info(categories)
+      info.each do |row|
+        puts row
+      end
       [categories, category_names]
     end
 
@@ -34,14 +35,10 @@ module Discourse
         name = CLI::UI.fmt "{{blue:#{category[:name]}}}"
         read_restricted = category[:read_restricted]
         description = category[:description_excerpt]
-        rows << [name, read_restricted, description]
+        row = "#{name}\nread restricted: #{read_restricted}\n #{description}"
+        rows << row
       end
-
-      # TODO: be careful with this. Have a look at CLI::UI::Terminal for ideas
-      table = Terminal::Table.new(headings: ['Name', 'Read Restricted', 'Description'],
-                                  rows:)
-      table.style = { border: :unicode_round }
-      puts table
+      rows
     end
   end
 end

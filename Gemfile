@@ -13,7 +13,6 @@ gem 'faraday-multipart', '~> 1.0', '>= 1.0.4'
 gem 'mime-types', '~> 3.1', require: 'mime/types/full'
 gem 'rake', '~> 13.0', '>= 13.0.6'
 gem 'sqlite3', '~> 1.4'
-gem 'terminal-table', '~> 3.0', '>= 3.0.1'
 
 group :development do
   gem 'neovim'
