@@ -9,10 +9,16 @@ module Discourse
         def call
           host = config_for_host
           username_for_host(host)
+          vault_dir_for_host(host)
+          host
         end
 
         def base_url_prompt
           'Base URL of the Discourse site you want to connect to'
+        end
+
+        def base_url_confirm_prompt(base_url)
+          "Confirm that #{base_url} is correct"
         end
 
         def username_prompt(host)
@@ -23,8 +29,21 @@ module Discourse
           "Confirm that #{username} should be used for publishing Notes to #{host}"
         end
 
+        def vault_dir_prompt(host)
+          "Local vault directory to use for #{host}"
+        end
+
+        def vault_dir_confirm_prompt(host, vault_dir)
+          "Confirm that #{vault_dir} is the correct directory to use for #{host}"
+        end
+
         def config_for_host
-          base_url = CLI::UI::Prompt.ask(base_url_prompt)
+          base_url = nil
+          loop do
+            base_url = CLI::UI::Prompt.ask(base_url_prompt)
+            confirm = CLI::UI::Prompt.confirm(base_url_confirm_prompt(base_url))
+            break if confirm
+          end
           host = extract_host(base_url)
           host_configured = Discourse::Config.get(host, base_url) && base_url == host_configured
 
@@ -53,6 +72,27 @@ module Discourse
           end
 
           Discourse::Config.set(host, 'discourse_username', username)
+        end
+
+        def vault_dir_for_host(host)
+          vault_dir = Discourse::Config.get(host, 'vault_directory')
+
+          if vault_dir
+            loop do
+              confirm = CLI::UI::Prompt.confirm(vault_dir_confirm_prompt(host, vault_dir))
+              break if confirm
+
+              vault_dir = CLI::UI::Prompt.ask(vault_dir_prompt(host))
+            end
+          else
+            loop do
+              vault_dir = CLI::UI::Prompt.ask(vault_dir_prompt(host))
+              confirm = CLI::UI::Prompt.confirm(vault_dir_confirm_prompt(host, vault_dir))
+              break if confirm
+            end
+          end
+
+          Discourse::Config.set(host, 'vault_directory', vault_dir)
         end
 
         def extract_host(url)
