@@ -1,13 +1,9 @@
 # frozen_string_literal: true
 
-# require 'singleton'
-
 require_relative 'discourse_request'
 
 module Discourse
   class DiscourseCategoryFetcher
-    # include Singleton
-
     attr_reader :categories
 
     def initialize(host, api_key)

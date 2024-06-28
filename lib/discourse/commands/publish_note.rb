@@ -4,7 +4,7 @@ require_relative '../../utils/api_credentials'
 require_relative '../../utils/api_key'
 require_relative '../../utils/ask_password'
 require_relative '../../utils/discourse_config'
-require_relative '../../services/discourse_category_fetcher'
+require_relative '../../ui/category_info'
 
 module Discourse
   module Commands
@@ -30,8 +30,7 @@ module Discourse
 
       def site_info_frame(host, api_key)
         CLI::UI::Frame.open('Discourse info') do
-          category_fetcher = DiscourseCategoryFetcher.new(host, api_key)
-          puts category_fetcher.categories
+          Discourse::UI.category_loader(host, api_key)
         end
       end
     end
