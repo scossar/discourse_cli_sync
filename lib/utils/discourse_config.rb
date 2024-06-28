@@ -40,8 +40,8 @@ module Discourse
         def config_for_host
           base_url = nil
           loop do
-            base_url = CLI::UI::Prompt.ask(base_url_prompt)
-            confirm = CLI::UI::Prompt.confirm(base_url_confirm_prompt(base_url))
+            base_url = ask(base_url_prompt)
+            confirm = confirm(base_url_confirm_prompt(base_url))
             break if confirm
           end
           host = extract_host(base_url)
@@ -58,15 +58,15 @@ module Discourse
 
           if username
             loop do
-              confirm = CLI::UI::Prompt.confirm(username_confirm_prompt(host, username))
+              confirm = confirm(username_confirm_prompt(host, username))
               break if confirm
 
-              username = CLI::UI::Prompt.ask(username_prompt(host))
+              username = ask(username_prompt(host))
             end
           else
             loop do
-              username = CLI::UI::Prompt.ask(username_prompt(host))
-              confirm = CLI::UI::Prompt.confirm(username_confirm_prompt(host, username))
+              username = ask(username_prompt(host))
+              confirm = confirm(username_confirm_prompt(host, username))
               break if confirm
             end
           end
@@ -79,20 +79,28 @@ module Discourse
 
           if vault_dir
             loop do
-              confirm = CLI::UI::Prompt.confirm(vault_dir_confirm_prompt(host, vault_dir))
+              confirm = ask(vault_dir_confirm_prompt(host, vault_dir))
               break if confirm
 
-              vault_dir = CLI::UI::Prompt.ask(vault_dir_prompt(host))
+              vault_dir = ask(vault_dir_prompt(host))
             end
           else
             loop do
-              vault_dir = CLI::UI::Prompt.ask(vault_dir_prompt(host))
-              confirm = CLI::UI::Prompt.confirm(vault_dir_confirm_prompt(host, vault_dir))
+              vault_dir = ask(vault_dir_prompt(host))
+              confirm = confirm(vault_dir_confirm_prompt(host, vault_dir))
               break if confirm
             end
           end
 
           Discourse::Config.set(host, 'vault_directory', vault_dir)
+        end
+
+        def ask(prompt)
+          CLI::UI::Prompt.ask(prompt)
+        end
+
+        def confirm(prompt)
+          CLI::UI::Prompt.confirm(prompt)
         end
 
         def extract_host(url)
