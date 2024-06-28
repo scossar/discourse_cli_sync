@@ -14,31 +14,25 @@ module Discourse
       end
 
       categories, category_names = nil
-      spin_group.add('Categories') do
+      spin_group.add('Categories') do |spinner|
         categories = fetcher.categories
         category_names = fetcher.category_names
+        spinner.update_title('Categories loaded')
       end
 
       spin_group.wait
 
-      info = category_info(categories)
-      info.each do |row|
-        puts row
-      end
+      category_info(categories)
       [categories, category_names]
     end
 
     def self.category_info(categories)
-      rows = []
-
       categories.each_value do |category|
-        name = CLI::UI.fmt "{{blue:#{category[:name]}}}"
-        read_restricted = category[:read_restricted]
-        description = category[:description_excerpt]
-        row = "#{name}\nread restricted: #{read_restricted}\n #{description}"
-        rows << row
+        CLI::UI::Frame.open(category[:name]) do
+          puts CLI::UI.fmt "read_restricted: #{category[:read_restricted]}"
+          puts CLI::UI.fmt category[:description_excerpt]
+        end
       end
-      rows
     end
   end
 end
