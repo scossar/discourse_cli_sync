@@ -1,85 +1,64 @@
 # frozen_string_literal: true
 
+require 'uri'
+
 module Discourse
   module Utils
     class DiscourseConfig
       class << self
         def call
-          discourse_site
-          discourse_credentials
-          vault_credentials
+          host = config_for_host
+          username_for_host(host)
         end
 
         def base_url_prompt
-          "The Discourse site's base URL"
+          'Base URL of the Discourse site you want to connect to'
         end
 
-        def base_url_confirm(base_url)
-          "Is #{base_url} correct?"
+        def username_prompt(host)
+          "Your username on #{host}"
         end
 
-        def discourse_username_prompt
-          "What's your Discourse username"
+        def username_confirm_prompt(host, username)
+          "Confirm that #{username} should be used for publishing Notes to #{host}"
         end
 
-        def discourse_username_confirm(username)
-          "Is #{username} correct?"
+        def config_for_host
+          base_url = CLI::UI::Prompt.ask(base_url_prompt)
+          host = extract_host(base_url)
+          host_configured = Discourse::Config.get(host, base_url) && base_url == host_configured
+
+          return host if host_configured
+
+          Discourse::Config.set(host, 'base_url', base_url)
+          host
         end
 
-        def vault_dir_prompt
-          'What directory is your Obsidian Vault in?'
-        end
+        def username_for_host(host)
+          username = Discourse::Config.get(host, 'discourse_username')
 
-        def vault_dir_confirm(dir)
-          "Is #{dir} correct?"
-        end
-
-        private
-
-        def discourse_site
-          base_url = Discourse::Config.get('discourse_site', 'base_url')
-
-          unless base_url
+          if username
             loop do
-              base_url = CLI::UI::Prompt.ask(base_url_prompt)
+              confirm = CLI::UI::Prompt.confirm(username_confirm_prompt(host, username))
+              break if confirm
 
-              confirm = CLI::UI::Prompt.confirm(base_url_confirm(base_url))
-
+              username = CLI::UI::Prompt.ask(username_prompt(host))
+            end
+          else
+            loop do
+              username = CLI::UI::Prompt.ask(username_prompt(host))
+              confirm = CLI::UI::Prompt.confirm(username_confirm_prompt(host, username))
               break if confirm
             end
           end
 
-          Discourse::Config.set('discourse_site', 'base_url', base_url)
+          Discourse::Config.set(host, 'discourse_username', username)
         end
 
-        def discourse_credentials
-          discourse_username = Discourse::Config.get('credentials', 'discourse_username')
-
-          unless discourse_username
-            loop do
-              discourse_username = CLI::UI::Prompt.ask(discourse_username_prompt)
-
-              confirm = CLI::UI::Prompt.confirm(discourse_username_confirm(discourse_username))
-
-              break if confirm
-            end
-          end
-
-          Discourse::Config.set('credentials', 'discourse_username', discourse_username)
-        end
-
-        def vault_credentials
-          vault_dir = Discourse::Config.get('vault', 'vault_dir')
-
-          unless vault_dir
-            loop do
-              vault_dir = CLI::UI::Prompt.ask(vault_dir_prompt)
-              confirm = CLI::UI::Prompt.confirm(vault_dir_confirm(vault_dir))
-
-              break if confirm
-            end
-          end
-          Discourse::Config.set('vault', 'vault_dir', vault_dir)
+        def extract_host(url)
+          # TODO: handle errors
+          uri = URI.parse(url)
+          uri.host
         end
       end
     end
