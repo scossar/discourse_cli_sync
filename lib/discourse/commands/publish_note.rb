@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative '../../utils/api_credentials'
+# require_relative '../../utils/api_credentials'
 require_relative '../../utils/api_key'
 require_relative '../../utils/ask_password'
 require_relative '../../utils/discourse_config'
@@ -18,10 +18,10 @@ module Discourse
 
       def credential_frames
         CLI::UI::Frame.open('Discourse credentials') do
-          Discourse::Utils::DiscourseConfig.call
+          host = Discourse::Utils::DiscourseConfig.call
           # TODO: return the password from ApiCredentials.call.
           # if it's not null, don't ask again in the command
-          # Discourse::Utils::ApiCredentials.call
+          # Discourse::Utils::ApiCredentials.call(host)
           # password = Discourse::Utils::AskPassword.ask_password('Your API key password')
           # api_key = Discourse::Utils::ApiKey.api_key(password)
           # [password, api_key]

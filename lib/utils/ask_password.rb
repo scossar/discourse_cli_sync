@@ -7,7 +7,7 @@ module Discourse
         CLI::UI::Prompt.ask_password(prompt)
       end
 
-      def self.ask_and_confirm_password(prompt, mismatch_prompt, confirm_prompt)
+      def self.ask_and_confirm_password(prompt, confirm_prompt, mismatch_prompt)
         password = nil
         mismatch = false
         loop do
