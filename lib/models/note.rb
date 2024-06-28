@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'active_record'
+
 module Discourse
   class Note < ActiveRecord::Base
     belongs_to :directory

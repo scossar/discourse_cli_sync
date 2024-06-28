@@ -9,7 +9,7 @@ module Discourse
     class ApiCredentials
       class << self
         def call(host)
-          # something
+          credentials_for_host(host)
         end
 
         def ask_password_prompt

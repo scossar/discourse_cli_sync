@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+require 'active_record'
+
 module Discourse
   class EncryptedCredential < ActiveRecord::Base
     validates :host, presence: true, uniqueness: true
