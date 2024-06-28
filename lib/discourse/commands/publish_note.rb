@@ -30,7 +30,7 @@ module Discourse
 
       def site_info_frame(host, api_key)
         CLI::UI::Frame.open('Discourse info') do
-          categories, category_names = Discourse::UI.category_loader(host, api_key)
+          categories, category_names = Discourse::UI::CategoryInfo.category_loader(host, api_key)
           [categories, category_names]
         end
       end

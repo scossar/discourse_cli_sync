@@ -4,33 +4,35 @@ require_relative '../services/discourse_category_fetcher'
 
 module Discourse
   module UI
-    def self.category_loader(host, api_key)
-      fetcher = DiscourseCategoryFetcher.new(host, api_key)
+    module CategoryInfo
+      def self.category_loader(host, api_key)
+        fetcher = DiscourseCategoryFetcher.new(host, api_key)
 
-      spin_group = CLI::UI::SpinGroup.new
+        spin_group = CLI::UI::SpinGroup.new
 
-      spin_group.failure_debrief do |_title, exception|
-        puts CLI::UI.fmt "  #{exception}"
+        spin_group.failure_debrief do |_title, exception|
+          puts CLI::UI.fmt "  #{exception}"
+        end
+
+        categories, category_names = nil
+        spin_group.add('Categories') do |spinner|
+          categories = fetcher.categories
+          category_names = fetcher.category_names
+          spinner.update_title('Categories loaded')
+        end
+
+        spin_group.wait
+
+        category_info(categories)
+        [categories, category_names]
       end
 
-      categories, category_names = nil
-      spin_group.add('Categories') do |spinner|
-        categories = fetcher.categories
-        category_names = fetcher.category_names
-        spinner.update_title('Categories loaded')
-      end
-
-      spin_group.wait
-
-      category_info(categories)
-      [categories, category_names]
-    end
-
-    def self.category_info(categories)
-      categories.each_value do |category|
-        CLI::UI::Frame.open(category[:name]) do
-          puts CLI::UI.fmt "read_restricted: #{category[:read_restricted]}"
-          puts CLI::UI.fmt category[:description_excerpt]
+      def self.category_info(categories)
+        categories.each_value do |category|
+          CLI::UI::Frame.open(category[:name]) do
+            puts CLI::UI.fmt "read_restricted: #{category[:read_restricted]}"
+            puts CLI::UI.fmt category[:description_excerpt]
+          end
         end
       end
     end
