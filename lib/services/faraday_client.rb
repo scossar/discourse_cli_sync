@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
+require 'faraday'
+require 'faraday/follow_redirects'
+require 'faraday/multipart'
+
 require_relative '../errors/errors'
+
 module Discourse
   class FaradayClient
     DEFAULT_TIMEOUT = 30
