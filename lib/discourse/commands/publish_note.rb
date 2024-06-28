@@ -24,8 +24,8 @@ module Discourse
           # if it's not null, don't ask again in the command
           Discourse::Utils::ApiCredentials.call
           password = Discourse::Utils::AskPassword.ask_password('Your API key password')
-          api_key = Discourse::Utils::ApiKey.api_key(password)
-          [password, api_key]
+          # api_key = Discourse::Utils::ApiKey.api_key(password)
+          # [password, api_key]
         end
       end
     end
