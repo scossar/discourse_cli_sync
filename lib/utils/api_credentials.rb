@@ -35,14 +35,13 @@ module Discourse
         end
 
         def credentials(host)
-          Logger.debug("in the credentials method for host #{host}")
           encrypted_credentials = EncryptedCredential.find_by(host:)
 
-          [nil, nil, nil] unless encrypted_credentials
+          return [nil, nil, nil] unless encrypted_credentials
 
           iv = encrypted_credentials.iv
           salt = encrypted_credentials.salt
-          encrypted_api_key = encrypted_credentials.api_key
+          encrypted_api_key = encrypted_credentials.encrypted_api_key
           [iv, salt, encrypted_api_key]
         end
 
@@ -50,12 +49,13 @@ module Discourse
           iv, salt, encrypted_api_key = credentials(host)
 
           if iv && salt && encrypted_api_key
-            CLI::UI.fmt "Api credentials are configured for #{host}"
+            puts CLI::UI.fmt "Api credentials are configured for #{host}"
+            nil
           else
             password = AskPassword.ask_and_confirm_password(ask_password_prompt,
                                                             password_confirm_prompt,
                                                             password_mismatch_prompt)
-            set_api_key(password)
+            set_api_key(host, password)
             password
           end
         end

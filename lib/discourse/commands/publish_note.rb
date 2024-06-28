@@ -21,7 +21,8 @@ module Discourse
           host = Discourse::Utils::DiscourseConfig.call
           password = Discourse::Utils::ApiCredentials.call(host)
           password ||= Discourse::Utils::AskPassword.ask_password('Your API key password')
-          api_key = Discourse::Utils::ApiKey.api_key(password)
+          api_key = Discourse::Utils::ApiKey.api_key(host, password)
+          puts "API KEY: #{api_key}"
           [host, password, api_key]
         end
       end
