@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require_relative 'ui'
+require_relative 'ui_utils'
 require_relative '../services/publisher'
 
 module Discourse
@@ -25,7 +25,7 @@ module Discourse
 
         def attachments_task(spin_group:, title:, markdown:)
           spin_group.add("Handling uploads for #{title}") do |spinner|
-            markdown, filenames = @publisher.handle_attachments(host:, api_key:, markdown:)
+            markdown, filenames = @publisher.handle_attachments(markdown)
             spinner_title = uploads_title(filenames, title)
             spinner.update_title(spinner_title)
           end
@@ -36,7 +36,7 @@ module Discourse
         def uploads_title(filenames, title)
           if filenames.any?
             uploads_str = Discourse::Utils::Ui.colored_text_from_array(filenames, 'green')
-            "Uploaded #{uploads_str} for {{greeen:#{title}}}"
+            "Uploaded #{uploads_str} for {{green:#{title}}}"
           else
             "No uploads for {{green:#{title}}}"
           end

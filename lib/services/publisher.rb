@@ -22,8 +22,8 @@ module Discourse
         [title, front_matter, markdown]
       end
 
-      def handle_attachments(host:, api_key:, markdown:)
-        attachment_handler = AttachmentHandler.new(host:, api_key:, markdown:)
+      def handle_attachments(markdown)
+        attachment_handler = AttachmentHandler.new(host: @host, api_key: @api_key, markdown:)
         attachment_handler.convert
       end
     end

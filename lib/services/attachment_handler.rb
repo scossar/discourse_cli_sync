@@ -37,7 +37,7 @@ module Discourse
       def upload_image(image_path)
         puts "Uploading file '#{image_path}'"
         expanded_path = File.expand_path(image_path)
-        client = DiscourseRequest.new(host, api_key)
+        client = DiscourseRequest.new(@host, @api_key)
         client.upload_file(expanded_path)
       end
     end

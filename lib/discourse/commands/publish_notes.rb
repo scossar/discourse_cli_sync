@@ -60,7 +60,7 @@ module Discourse
         CLI::UI::Frame.open("Publishing #{notes_str}") do
           notes.each do |note|
             note_path = path_for_note(note, dir)
-            Discourse::Utils::NotePublisher.call(host, api_key, note_path)
+            Discourse::Utils::NotePublisher.call(host:, api_key:, note: note_path)
           end
         end
       end
