@@ -8,6 +8,7 @@ require_relative '../../utils/category_info'
 require_relative '../../utils/note_selector'
 require_relative '../../utils/category_selector'
 require_relative '../../utils/ui_utils'
+require_relative '../../utils/note_publisher'
 
 module Discourse
   module Commands
@@ -57,8 +58,16 @@ module Discourse
       def publish_notes_frame(host:, notes:, dir:, category_id:, api_key:)
         notes_str = Discourse::Utils::Ui.colored_text_from_array(notes, 'green')
         CLI::UI::Frame.open("Publishing #{notes_str}") do
-          puts "host: #{host}, notes: #{notes}, dir: #{dir}, category_id: #{category_id}, api_key: #{api_key}"
+          notes.each do |note|
+            note_path = path_for_note(note, dir)
+            Discourse::Utils::NotePublisher.call(host, api_key, note_path)
+          end
         end
+      end
+
+      def path_for_note(note, dir)
+        expanded_path = File.expand_path(dir)
+        File.join(expanded_path, note)
       end
     end
   end
