@@ -13,8 +13,7 @@ module Discourse
       def call(_args, _name)
         host, _password, api_key = credential_frames
         _categories, _category_names = site_info_frame(host, api_key)
-        note = note_selector_frame(host)
-        puts "selected note: #{note}"
+        _notes, _dir = note_selector_frame(host)
       end
 
       def self.help
@@ -33,14 +32,14 @@ module Discourse
 
       def site_info_frame(host, api_key)
         CLI::UI::Frame.open('Discourse info') do
-          categories, category_names = Discourse::UI::CategoryInfo.category_loader(host, api_key)
+          categories, category_names = Discourse::Utils::CategoryInfo.category_loader(host, api_key)
           [categories, category_names]
         end
       end
 
       def note_selector_frame(host)
         CLI::UI::Frame.open('Select note') do
-          Discourse::Services::NoteSelector.call(host)
+          Discourse::Utils::NoteSelector.call(host)
         end
       end
     end
