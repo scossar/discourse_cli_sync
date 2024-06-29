@@ -3,7 +3,7 @@
 require_relative '../services/discourse_category_fetcher'
 
 module Discourse
-  module UI
+  module Utils
     module CategoryInfo
       def self.category_loader(host, api_key)
         fetcher = DiscourseCategoryFetcher.new(host, api_key)

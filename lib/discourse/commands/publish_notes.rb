@@ -4,7 +4,7 @@ require_relative '../../utils/api_credentials'
 require_relative '../../utils/api_key'
 require_relative '../../utils/ask_password'
 require_relative '../../utils/discourse_config'
-require_relative '../../ui/category_info'
+require_relative '../../utils/category_info'
 require_relative '../../services/note_selector'
 
 module Discourse
