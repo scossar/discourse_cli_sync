@@ -37,6 +37,7 @@ GEM
       multipart-post (~> 2)
     faraday-net_http (3.1.0)
       net-http
+    front_matter_parser (1.0.1)
     i18n (1.14.5)
       concurrent-ruby (~> 1.0)
     metaclass (0.0.4)
@@ -89,6 +90,7 @@ DEPENDENCIES
   faraday (~> 2.7, >= 2.9.1)
   faraday-follow_redirects (~> 0.3.0)
   faraday-multipart (~> 1.0, >= 1.0.4)
+  front_matter_parser (~> 1.0, >= 1.0.1)
   mime-types (~> 3.1)
   minitest (>= 5.0.0)
   minitest-reporters
