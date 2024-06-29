@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require 'active_record'
-
 module Discourse
   class Directory < ActiveRecord::Base
     has_many :notes

@@ -1,11 +1,9 @@
 # frozen_string_literal: true
 
-require 'active_record'
-
 module Discourse
   class Note < ActiveRecord::Base
     belongs_to :directory
-    has_many :discourse_topics
+    belongs_to :discourse_category
 
     validates :title, presence: true, uniqueness: { scope: :directory_id }
     validates :local_only, inclusion: { in: [true, false] }
