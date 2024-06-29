@@ -9,7 +9,7 @@ require_relative '../../services/note_selector'
 
 module Discourse
   module Commands
-    class PublishNote < Discourse::Command
+    class PublishNotes < Discourse::Command
       def call(_args, _name)
         host, _password, api_key = credential_frames
         _categories, _category_names = site_info_frame(host, api_key)
@@ -40,7 +40,7 @@ module Discourse
 
       def note_selector_frame(host)
         CLI::UI::Frame.open('Select note') do
-          Discourse::Services::NoteSelector.select_note(host)
+          Discourse::Services::NoteSelector.call(host)
         end
       end
     end

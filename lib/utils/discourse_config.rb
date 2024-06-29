@@ -37,6 +37,8 @@ module Discourse
           "Confirm that #{vault_dir} is the correct directory to use for #{host}"
         end
 
+        # TODO: this needs error handling. If an invalid URL is entered and confirmed
+        # things will go wrong!
         def config_for_host
           base_url = nil
           loop do

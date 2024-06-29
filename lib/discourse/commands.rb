@@ -11,7 +11,7 @@ module Discourse
       Registry.add(-> { const_get(const) }, cmd)
     end
 
-    register :PublishNote, 'publish_note', 'discourse/commands/publish_note'
+    register :PublishNotes, 'publish_notes', 'discourse/commands/publish_notes'
     register :Help, 'help', 'discourse/commands/help'
   end
 end
