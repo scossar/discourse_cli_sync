@@ -5,7 +5,7 @@ require_relative '../../utils/api_key'
 require_relative '../../utils/ask_password'
 require_relative '../../utils/discourse_config'
 require_relative '../../utils/category_info'
-require_relative '../../services/note_selector'
+require_relative '../../utils/note_selector'
 
 module Discourse
   module Commands

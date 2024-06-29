@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module Discourse
-  module Services
+  module Utils
     class NoteSelector
       class << self
         def call(host)
