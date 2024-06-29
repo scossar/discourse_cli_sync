@@ -3,14 +3,16 @@
 require 'front_matter_parser'
 
 require_relative 'attachment_handler'
+require_relative 'internal_link_handler'
 
 module Discourse
   module Services
     class Publisher
-      def initialize(host:, api_key:, note:)
+      def initialize(host:, api_key:, note:, category_id:)
         @host = host
-        @note = note
         @api_key = api_key
+        @note = note
+        @category_id = category_id
       end
 
       def parse_file
@@ -25,6 +27,12 @@ module Discourse
       def handle_attachments(markdown)
         attachment_handler = AttachmentHandler.new(host: @host, api_key: @api_key, markdown:)
         attachment_handler.convert
+      end
+
+      def handle_internal_links(markdown)
+        internal_link_handler = InternalLinkHandler.new(host: @host, api_key: @api_key, markdown:,
+                                                        category_id: @category_id)
+        internal_link_handler.handle
       end
     end
   end
