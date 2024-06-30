@@ -37,7 +37,7 @@ module Discourse
       def placeholder_topic(title)
         markdown = "This is a placeholder topic for #{title}"
         post_data = create_discourse_topic(title, markdown)
-        note = create_note(title, post_data)
+        note = create_note_entry(title, post_data)
         note.topic_url
       end
 
@@ -51,7 +51,7 @@ module Discourse
         end
       end
 
-      def create_note(title, post_data)
+      def create_note_entry(title, post_data)
         topic_url = url_from_post_data(post_data)
         topic_id = post_data['topic_id']
         post_id = post_data['id']

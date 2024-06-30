@@ -2,6 +2,7 @@
 
 require_relative 'ui_utils'
 require_relative '../services/publisher'
+require_relative '../models/note'
 
 module Discourse
   module Utils
@@ -22,6 +23,7 @@ module Discourse
 
           markdown = attachments_task(spin_group:, title:, markdown:)
           markdown = internal_links_task(spin_group:, title:, markdown:)
+          publish_task(spin_group:, title:, markdown:)
         end
 
         def attachments_task(spin_group:, title:, markdown:)
@@ -42,6 +44,31 @@ module Discourse
           end
           spin_group.wait
           markdown
+        end
+
+        def publish_task(spin_group:, title:, markdown:)
+          note = Discourse::Note.find_by(title:)
+          if note
+            update_topic(spin_group:, title:, markdown:, note:)
+          else
+            create_topic(spin_group:, title:, markdown:)
+          end
+        end
+
+        def update_topic(spin_group:, title:, markdown:, note:)
+          spin_group.add("Updating topic for #{title}") do |spinner|
+            @publisher.update_topic(note, markdown)
+            spinner.update_title("Topic updated for #{title}")
+          end
+          spin_group.wait
+        end
+
+        def create_topic(spin_group:, title:, markdown:)
+          spin_group.add("Creating new topic for #{title}") do |spinner|
+            @publisher.create_topic(title, markdown)
+            spinner.update_title("Topic created for #{title}")
+          end
+          spin_group.wait
         end
 
         def uploads_title(filenames, title)
