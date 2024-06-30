@@ -16,9 +16,9 @@ module Discourse
       def call(_args, _name)
         host, _password, api_key = credential_frames
         categories, _category_names = site_info_frame(host, api_key)
-        notes, dir = note_selector_frame(host)
-        category_id = category_selector_frame(notes, categories)
-        publish_notes_frame(host:, notes:, dir:, category_id:, api_key:)
+        # notes, dir = note_selector_frame(host)
+        # category_id = category_selector_frame(notes, categories)
+        # publish_notes_frame(host:, notes:, dir:, category_id:, api_key:)
       end
 
       def self.help

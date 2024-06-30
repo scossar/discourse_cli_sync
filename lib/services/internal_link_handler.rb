@@ -3,7 +3,6 @@
 require_relative 'discourse_request'
 require_relative '../errors/errors'
 require_relative '../models/note'
-require_relative '../models/discourse_topic'
 
 module Discourse
   module Services
@@ -23,7 +22,7 @@ module Discourse
           title = link_match.match(@internal_link_regex)[1]
           internal_links << title
           # TODO: a note needs to have a topic
-          discourse_url = Note.find_by(title:)&.discourse_topic&.url
+          discourse_url = Note.find_by(title:)&.topic_url
           discourse_url ||= placeholder_topic(title)
           new_link = "[#{title}](#{discourse_url})"
           new_link

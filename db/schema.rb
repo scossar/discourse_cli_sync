@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_29_224852) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_29_235702) do
   create_table "directories", force: :cascade do |t|
     t.string "path", null: false
     t.string "archetype", default: "regular", null: false
@@ -27,6 +27,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_29_224852) do
     t.boolean "read_restricted", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "description"
     t.index ["name"], name: "index_discourse_categories_on_name", unique: true
     t.index ["slug"], name: "index_discourse_categories_on_slug", unique: true
   end
