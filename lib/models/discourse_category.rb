@@ -9,6 +9,8 @@ module Discourse
     validates :slug, presence: true, uniqueness: true
     validates :read_restricted, inclusion: { in: [true, false] }
 
+    # TODO: if a category has been deleted on Discourse, it should be
+    # deleted here with some kind of warning
     def self.create_or_update(name:, slug:, read_restricted:, description:)
       category = DiscourseCategory.find_by(name:)
       if category
