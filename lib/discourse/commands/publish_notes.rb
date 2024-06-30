@@ -5,6 +5,7 @@ require_relative '../../utils/api_key'
 require_relative '../../utils/ask_password'
 require_relative '../../utils/discourse_config'
 require_relative '../../utils/category_info'
+require_relative '../../utils/vault_info'
 require_relative '../../utils/note_selector'
 require_relative '../../utils/category_selector'
 require_relative '../../utils/ui_utils'
@@ -15,7 +16,8 @@ module Discourse
     class PublishNotes < Discourse::Command
       def call(_args, _name)
         host, _password, api_key = credential_frames
-        categories, _category_names = site_info_frame(host, api_key)
+        _categories, _category_names = site_info_frame(host, api_key)
+        _directories = vault_info_frame(host)
         # notes, dir = note_selector_frame(host)
         # category_id = category_selector_frame(notes, categories)
         # publish_notes_frame(host:, notes:, dir:, category_id:, api_key:)
@@ -39,6 +41,12 @@ module Discourse
         CLI::UI::Frame.open('Discourse info') do
           categories, category_names = Discourse::Utils::CategoryInfo.category_loader(host, api_key)
           [categories, category_names]
+        end
+      end
+
+      def vault_info_frame(host)
+        CLI::UI::Frame.open('Vault info') do
+          Discourse::Utils::VaultInfo.directory_loader(host)
         end
       end
 
