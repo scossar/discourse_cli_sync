@@ -11,12 +11,12 @@ module Discourse
 
     # TODO: if a category has been deleted on Discourse, it should be
     # deleted here with some kind of warning
-    def self.create_or_update(name:, slug:, read_restricted:, description:)
+    def self.create_or_update(name:, slug:, read_restricted:, description:, discourse_id:)
       category = DiscourseCategory.find_by(name:)
       if category
-        category.update(name:, slug:, read_restricted:, description:)
+        category.update(name:, slug:, read_restricted:, description:, discourse_id:)
       else
-        DiscourseCategory.create(name:, slug:, read_restricted:, description:)
+        DiscourseCategory.create(name:, slug:, read_restricted:, description:, discourse_id:)
       end
     end
   end

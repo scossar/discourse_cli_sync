@@ -18,7 +18,7 @@ module Discourse
         host, _password, api_key = credential_frames
         _categories, _category_names = site_info_frame(host, api_key)
         _directories = vault_info_frame(host)
-        notes, _dir = note_selector_frame(host)
+        notes, dir = note_selector_frame(host)
         category = category_selector_frame(notes)
         publish_notes_frame(host:, notes:, dir:, category:, api_key:)
       end

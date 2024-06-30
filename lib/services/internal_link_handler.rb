@@ -21,10 +21,9 @@ module Discourse
         link_adjusted = @markdown.gsub(@internal_link_regex) do |link_match|
           title = link_match.match(@internal_link_regex)[1]
           internal_links << title
-          # TODO: a note needs to have a topic
-          discourse_url = Note.find_by(title:)&.topic_url
-          discourse_url ||= placeholder_topic(title)
-          new_link = "[#{title}](#{discourse_url})"
+          topic_url = Note.find_by(title:)&.topic_url
+          topic_url ||= placeholder_topic(title)
+          new_link = "[#{title}](#{topic_url})"
           new_link
         rescue StandardError => e
           raise Discourse::Errors::BaseError,
@@ -38,13 +37,13 @@ module Discourse
       def placeholder_topic(title)
         markdown = "This is a placeholder topic for #{title}"
         post_data = create_discourse_topic(title, markdown)
-        note = create_note(title)
-        create_discourse_topic_entry(post_data, note)
+        note = create_note(title, post_data)
+        note.topic_url
       end
 
       def create_discourse_topic(title, markdown)
         client = DiscourseRequest.new(@host, @api_key)
-        client.create_topic(title:, markdown:, category: @category_id).tap do |response|
+        client.create_topic(title:, markdown:, category: @category.discourse_id).tap do |response|
           unless response
             raise Discourse::Errors::BaseError,
                   "Failed to create linked topic for '#{title}'"
@@ -52,32 +51,19 @@ module Discourse
         end
       end
 
-      def create_note(title)
-        Note.create(title:, local_only: false).tap do |note|
+      def create_note(title, post_data)
+        topic_url = url_from_post_data(post_data)
+        topic_id = post_data['topic_id']
+        post_id = post_data['id']
+        Note.create(title:, topic_url:, topic_id:, post_id:).tap do |note|
           raise Discourse::Errors::BaseError, 'Note could not be created' unless note.persisted?
         end
       rescue StandardError => e
         raise Discourse::Errors::BaseError, "Error creating Note: #{e.message}"
       end
 
-      def url_from_post_data(response)
-        "#{@base_url}/t/#{response['topic_slug']}/#{response['topic_id']}"
-      end
-
-      # NOTE: you need to figure out what's going on with categories
-      def create_discourse_topic_entry(post_data, note)
-        url = url_from_post_data(post_data)
-        topic_id = post_data['topic_id']
-        post_id = post_data['id']
-        DiscourseTopic.create(url:, topic_id:,
-                              post_id:, note:).tap do |topic|
-          unless topic.persisted?
-            raise Discourse::Errors::BaseError, 'DiscourseTopic could not be created'
-          end
-        end
-        url
-      rescue StandardError => e
-        raise Discourse::Errors::BaseError, "Error creating DiscourseTopic: #{e.message}"
+      def url_from_post_data(post_data)
+        "#{@base_url}/t/#{post_data['topic_slug']}/#{post_data['topic_id']}"
       end
     end
   end

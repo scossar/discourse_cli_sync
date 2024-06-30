@@ -53,7 +53,7 @@ module Discourse
           end
         end
 
-        def self.links_title(stub_topics, title)
+        def links_title(stub_topics, title)
           if stub_topics.any?
             topics_str = Discourse::Utils::Ui.colored_text_from_array(stub_topics, 'green')
             "Generated stub topics for #{topics_str}"
