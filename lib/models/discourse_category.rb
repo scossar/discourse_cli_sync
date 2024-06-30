@@ -8,5 +8,14 @@ module Discourse
     validates :name, presence: true, uniqueness: true
     validates :slug, presence: true, uniqueness: true
     validates :read_restricted, inclusion: { in: [true, false] }
+
+    def self.create_or_update(name:, slug:, read_restricted:, description:)
+      category = DiscourseCategory.find_by(name:)
+      if category
+        category.update(name:, slug:, read_restricted:, description:)
+      else
+        DiscourseCategory.create(name:, slug:, read_restricted:, description:)
+      end
+    end
   end
 end
