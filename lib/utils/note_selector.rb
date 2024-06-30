@@ -1,16 +1,14 @@
 # frozen_string_literal: true
 
+require_relative '../models/directory'
+
 module Discourse
   module Utils
     class NoteSelector
       class << self
         def call(host)
-          dir = select_dir(host)
+          dir = select_dir
           select_notes(host, dir)
-        end
-
-        def vault_dir_prompt(vault_dir)
-          "Are the notes to be published in your vault directory (#{vault_dir})?"
         end
 
         def directory_prompt
@@ -36,14 +34,11 @@ module Discourse
           end
         end
 
-        def select_dir(host)
-          vault_dir = Discourse::Config.get(host, 'vault_directory')
-          use_vault_dir = CLI::UI::Prompt.confirm(vault_dir_prompt(vault_dir))
-          return vault_dir if use_vault_dir
-
+        def select_dir
           dir = nil
+          directories = Discourse::Directory.all.pluck(:path)
           loop do
-            dir = CLI::UI::Prompt.ask(directory_prompt, is_file: true)
+            dir = CLI::UI::Prompt.ask(directory_prompt, options: directories)
             confirm = CLI::UI::Prompt.confirm(directory_confirm_prompt(dir))
             return dir if confirm
           end
