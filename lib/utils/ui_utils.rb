@@ -7,6 +7,10 @@ module Discourse
         colored = array.map { |item| "{{#{color}:#{item}}}" }
         colored.join(', ')
       end
+
+      def self.fancy_path(expanded_path)
+        expanded_path.gsub(/^#{Regexp.escape(Dir.home)}/, '~')
+      end
     end
   end
 end

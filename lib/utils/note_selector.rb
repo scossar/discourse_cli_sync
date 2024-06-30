@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../models/directory'
+require_relative '../utils/ui_utils'
 
 module Discourse
   module Utils
@@ -37,13 +38,15 @@ module Discourse
         def select_dir
           dir = nil
           directories = Discourse::Directory.all.pluck(:path)
+          fancy_paths = directories.map { |directory| Discourse::Utils::Ui.fancy_path(directory) }
           loop do
-            dir = CLI::UI::Prompt.ask(directory_prompt, options: directories)
+            dir = CLI::UI::Prompt.ask(directory_prompt, options: fancy_paths)
             confirm = CLI::UI::Prompt.confirm(directory_confirm_prompt(dir))
             return dir if confirm
           end
         end
 
+        # TODO: handle the case of an empty selection
         def select_notes(host, dir)
           notes = nil
           loop do

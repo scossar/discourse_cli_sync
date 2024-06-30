@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../models/directory'
+require_relative '../utils/ui_utils'
 
 module Discourse
   module Utils
@@ -13,7 +14,8 @@ module Discourse
         vault_dir = Discourse::Config.get(host, 'vault_directory')
         directories = all_directories(vault_dir)
         directories.each do |directory|
-          CLI::UI::Frame.open(directory) do
+          fancy_path = Discourse::Utils::Ui.fancy_path(directory)
+          CLI::UI::Frame.open(fancy_path) do
             find_or_create_directory(directory)
           end
         end
@@ -27,7 +29,8 @@ module Discourse
 
         spin_group.add('Updating Directories') do |spinner|
           Discourse::Directory.find_or_create_by(path: directory)
-          spinner.update_title("Updated database entry for #{directory}")
+          fancy_path = Discourse::Utils::Ui.fancy_path(directory)
+          spinner.update_title("Updated database entry for #{fancy_path}")
         end
 
         spin_group.wait
@@ -36,8 +39,7 @@ module Discourse
       def self.all_directories(vault_dir)
         expanded_dir = File.expand_path(vault_dir)
         subdirs = Dir.glob(File.join(expanded_dir, '**', '*/'))
-        subdirs.map { |subdir| subdir.gsub(/^#{Regexp.escape(Dir.home)}/, '~') }
-        subdirs << vault_dir
+        subdirs << expanded_dir
       end
     end
   end
