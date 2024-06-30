@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_29_235702) do
+ActiveRecord::Schema[7.1].define(version: 2024_06_30_000645) do
   create_table "directories", force: :cascade do |t|
     t.string "path", null: false
     t.string "archetype", default: "regular", null: false
@@ -30,6 +30,16 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_29_235702) do
     t.text "description"
     t.index ["name"], name: "index_discourse_categories_on_name", unique: true
     t.index ["slug"], name: "index_discourse_categories_on_slug", unique: true
+  end
+
+  create_table "encrypted_credentials", force: :cascade do |t|
+    t.string "host", null: false
+    t.string "iv", null: false
+    t.string "salt", null: false
+    t.string "encrypted_api_key", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["host"], name: "index_encrypted_credentials_on_host", unique: true
   end
 
   create_table "notes", force: :cascade do |t|
