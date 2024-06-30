@@ -8,11 +8,11 @@ require_relative 'internal_link_handler'
 module Discourse
   module Services
     class Publisher
-      def initialize(host:, api_key:, note:, category_id:)
+      def initialize(host:, api_key:, note:, category:)
         @host = host
         @api_key = api_key
         @note = note
-        @category_id = category_id
+        @category = category
       end
 
       def parse_file
@@ -31,7 +31,7 @@ module Discourse
 
       def handle_internal_links(markdown)
         internal_link_handler = InternalLinkHandler.new(host: @host, api_key: @api_key, markdown:,
-                                                        category_id: @category_id)
+                                                        category: @category)
         internal_link_handler.handle
       end
     end

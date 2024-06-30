@@ -20,7 +20,7 @@ module Discourse
         _directories = vault_info_frame(host)
         notes, _dir = note_selector_frame(host)
         category = category_selector_frame(notes)
-        # publish_notes_frame(host:, notes:, dir:, category_id:, api_key:)
+        publish_notes_frame(host:, notes:, dir:, category:, api_key:)
       end
 
       def self.help
@@ -64,12 +64,12 @@ module Discourse
         end
       end
 
-      def publish_notes_frame(host:, notes:, dir:, category_id:, api_key:)
+      def publish_notes_frame(host:, api_key:, notes:, dir:, category:)
         notes_str = Discourse::Utils::Ui.colored_text_from_array(notes, 'green')
         CLI::UI::Frame.open("Publishing #{notes_str}") do
           notes.each do |note|
             note_path = path_for_note(note, dir)
-            Discourse::Utils::NotePublisher.call(host:, api_key:, note: note_path, category_id:)
+            Discourse::Utils::NotePublisher.call(host:, api_key:, note: note_path, category:)
           end
         end
       end

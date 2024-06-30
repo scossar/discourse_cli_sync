@@ -7,8 +7,8 @@ module Discourse
   module Utils
     class NotePublisher
       class << self
-        def call(host:, api_key:, note:, category_id:)
-          @publisher = Discourse::Services::Publisher.new(host:, api_key:, note:, category_id:)
+        def call(host:, api_key:, note:, category:)
+          @publisher = Discourse::Services::Publisher.new(host:, api_key:, note:, category:)
           title, _front_matter, markdown = @publisher.parse_file
           publishing_frame(title, markdown)
         end
@@ -34,7 +34,7 @@ module Discourse
           markdown
         end
 
-        def internal_links_task(spin_group:, title:, markdown:, category_id:)
+        def internal_links_task(spin_group:, title:, markdown:)
           spin_group.add("Handling internal links for #{title}") do |spinner|
             markdown, stub_topics = @publisher.handle_internal_links(markdown)
             spinner_title = links_title(stub_topics, title)

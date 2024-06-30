@@ -7,11 +7,11 @@ require_relative '../models/note'
 module Discourse
   module Services
     class InternalLinkHandler
-      def initialize(host:, api_key:, markdown:, category_id:)
+      def initialize(host:, api_key:, markdown:, category:)
         @host = host
         @api_key = api_key
         @markdown = markdown
-        @category_id = category_id
+        @category = category
         @base_url = Discourse::Config.get(host, 'base_url')
         @internal_link_regex = /(?<!!)\[\[(.*?)\]\]/
       end
