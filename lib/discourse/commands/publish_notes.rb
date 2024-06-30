@@ -18,8 +18,8 @@ module Discourse
         host, _password, api_key = credential_frames
         _categories, _category_names = site_info_frame(host, api_key)
         _directories = vault_info_frame(host)
-        _notes, _dir = note_selector_frame(host)
-        # category_id = category_selector_frame(notes, categories)
+        notes, _dir = note_selector_frame(host)
+        category = category_selector_frame(notes)
         # publish_notes_frame(host:, notes:, dir:, category_id:, api_key:)
       end
 
@@ -50,16 +50,17 @@ module Discourse
         end
       end
 
+      # TODO: allow for selecting notes from multiple directories
       def note_selector_frame(host)
         CLI::UI::Frame.open('Select note') do
           Discourse::Utils::NoteSelector.call(host)
         end
       end
 
-      def category_selector_frame(notes, categories)
+      def category_selector_frame(notes)
         notes_str = Discourse::Utils::Ui.colored_text_from_array(notes, 'green')
         CLI::UI::Frame.open("Category for #{notes_str}") do
-          Discourse::Utils::CategorySelector.call(categories, notes)
+          Discourse::Utils::CategorySelector.call(notes)
         end
       end
 

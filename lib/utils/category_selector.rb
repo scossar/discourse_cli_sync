@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
 require_relative 'ui_utils'
+require_relative '../models/discourse_category'
 
 module Discourse
   module Utils
     class CategorySelector
       class << self
-        def call(categories, notes)
-          select_category(categories, notes)
+        def call(notes)
+          select_category(notes)
         end
 
         def category_prompt(notes)
@@ -19,23 +20,14 @@ module Discourse
           "Is #{category} correct?"
         end
 
-        def select_category(categories, notes)
-          category = nil
+        def select_category(notes)
+          category_names = Discourse::DiscourseCategory.all.pluck(:name)
+          category_name = nil
           loop do
-            category = CLI::UI::Prompt.ask(category_prompt(notes),
-                                           options: category_names(categories))
-            confirm = CLI::UI::Prompt.confirm(category_confirm_prompt(category))
-            return category_id_by_name(categories, category) if confirm
-          end
-        end
-
-        def category_names(categories)
-          categories.values.map { |category| category[:name] }
-        end
-
-        def category_id_by_name(categories, name)
-          categories.each do |id, category|
-            return id if category[:name] == name
+            category_name = CLI::UI::Prompt.ask(category_prompt(notes),
+                                                options: category_names)
+            confirm = CLI::UI::Prompt.confirm(category_confirm_prompt(category_name))
+            return Discourse::DiscourseCategory.find_by(name: category_name) if confirm
           end
         end
       end

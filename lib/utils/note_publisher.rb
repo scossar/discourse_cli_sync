@@ -34,7 +34,7 @@ module Discourse
           markdown
         end
 
-        def internal_links_task(spin_group:, title:, markdown:)
+        def internal_links_task(spin_group:, title:, markdown:, category_id:)
           spin_group.add("Handling internal links for #{title}") do |spinner|
             markdown, stub_topics = @publisher.handle_internal_links(markdown)
             spinner_title = links_title(stub_topics, title)
