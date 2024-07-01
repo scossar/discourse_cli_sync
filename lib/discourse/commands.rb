@@ -12,6 +12,7 @@ module Discourse
     end
 
     register :PublishNotes, 'publish_notes', 'discourse/commands/publish_notes'
+    register :PublishDirectory, 'publish_directory', 'discourse/commands/publish_directory'
     register :Help, 'help', 'discourse/commands/help'
   end
 end
