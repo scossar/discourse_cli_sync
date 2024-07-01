@@ -2,6 +2,9 @@
 
 require 'uri'
 
+require_relative '../models/encrypted_credential'
+require_relative 'logger'
+
 module Discourse
   module Utils
     class DiscourseConfig
@@ -40,6 +43,10 @@ module Discourse
         # TODO: this needs error handling. If an invalid URL is entered and confirmed
         # things will go wrong!
         def config_for_host
+          return if use_existing_config?
+
+          Discourse::Utils::Logger.debug("hosts: #{hosts}")
+
           base_url = nil
           loop do
             base_url = ask(base_url_prompt)
@@ -95,6 +102,20 @@ module Discourse
           end
 
           Discourse::Config.set(host, 'vault_directory', vault_dir)
+        end
+
+        def use_existing_config?
+          hosts = configured_hosts
+          false unless hosts.any? && hosts.length == 1
+
+          host = hosts[0]
+          username = Discourse::Config.get(host, 'discourse_username')
+          vault_dir = Discourse::Config.get(host, 'vault_directory')
+          confirm_existing_config(host, username, vault_dir)
+        end
+
+        def configured_hosts
+          Discourse::EncryptedCredential.all&.pluck(:host)
         end
 
         def ask(prompt)
