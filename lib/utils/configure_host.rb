@@ -1,129 +1,124 @@
 # frozen_string_literal: true
 
-require_relative '../models/encrypted_credential'
+require_relative '../models/discourse_site'
 
 module Discourse
   module Utils
     class ConfigureHost
       class << self
         def call
-          confirm_or_configure_host
+          configure_discourse_site
         end
 
-        def confirm_or_configure_host
-          hosts = configured_hosts
+        def configure_discourse_site
+          domains = configured_domains
 
-          if hosts.any?
-            select_host(hosts)
+          if domains.any?
+            select_site(domains)
           else
-            add_host
+            add_site
           end
         end
 
-        def select_host(hosts)
-          options =  hosts << 'add new host'
+        def select_site(domains)
+          options =  domains << 'add new site'
           selected = nil
           loop do
-            selected = CLI::UI::Prompt.ask('Select existing host, or add a new one', options:)
+            selected = CLI::UI::Prompt.ask('Select existing site, or add a new one', options:)
             confirm = CLI::UI::Prompt.confirm("You chose #{selected}. Is that correct?")
             break if confirm
           end
 
-          if selected == 'add new host'
-            add_host
+          if selected == 'add new site'
+            add_site
           else
-            confirm_host(selected)
+            confirm_site(selected)
           end
         end
 
-        def add_host
-          host = configure_base_url
-          configure_username(host)
-          configure_vault_directory(host)
-          host
+        def add_site
+          domain, base_url = configure_base_url
+          discourse_username = configure_username(domain)
+          vault_directory = configure_vault_directory(domain)
+          Discourse::DiscourseSite.create(domain:, base_url:, discourse_username:, vault_directory:)
+          domain
         end
 
-        def confirm_host(host)
-          base_url, discourse_username, vault_directory = config_for_host(host)
-          confirm_prompt = CLI::UI.fmt("Existing configuration for #{host}\n  " \
-                                       "base_url: #{base_url}\n  " \
+        def confirm_site(domain)
+          discourse_username, vault_directory = config_for_site(domain)
+          confirm_prompt = CLI::UI.fmt("Existing configuration for #{domain}\n  " \
                                        "discourse_username: #{discourse_username}\n  " \
                                        "vault_directory: #{vault_directory}\n" \
                                        'Are these values correct?')
           confirm = CLI::UI::Prompt.confirm(confirm_prompt)
-          return host if confirm
+          return domain if confirm
 
-          update_config(host:, base_url:, discourse_username:, vault_directory:)
+          update_config(domain:, discourse_username:, vault_directory:)
         end
 
-        def update_config(host:, base_url:, discourse_username:, vault_directory:)
-          update_base_url = CLI::UI::Prompt.confirm("Update base URL: #{base_url}?")
-          update_host_entry(host) if update_base_url
+        def update_config(domain:, discourse_username:, vault_directory:)
           update_username = CLI::UI::Prompt.confirm("Update username: #{discourse_username}?")
-          configure_username(host) if update_username
+          discourse_username = configure_username(domain) if update_username
           update_vault_directory = CLI::UI::Prompt.confirm("Update vault directory: #{vault_directory}?")
-          configure_vault_directory(host) if update_vault_directory
-          host
-        end
-
-        def update_host_entry(host)
-          puts CLI::UI.fmt("TODO: fix this. host: #{host}")
+          vault_directory = configure_vault_directory(domain) if update_vault_directory
+          if update_username || update_vault_directory
+            site = Discourse::DiscourseSite.find_by(domain:)
+            site.update(discourse_username:, vault_directory:)
+          end
+          domain
         end
 
         def configure_base_url
-          base_url, host = nil
+          base_url, domain = nil
           loop do
             base_url = CLI::UI::Prompt.ask('Discourse base URL')
-            host, error_message = extract_host(base_url)
-            confirm = CLI::UI::Prompt.confirm("Is #{host} correct?") if host
+            domain, error_message = extract_domain(base_url)
+            confirm = CLI::UI::Prompt.confirm("Is #{domain} correct?") if domain
             break if confirm
 
             puts CLI::UI.fmt(error_message)
           end
 
-          Discourse::Config.set(host, 'base_url', base_url)
-          host
+          [domain, base_url]
         end
 
-        def configure_username(host)
+        def configure_username(domain)
           discourse_username = nil
           loop do
-            discourse_username = CLI::UI::Prompt.ask("Discourse username for #{host}?")
+            discourse_username = CLI::UI::Prompt.ask("Discourse username for #{domain}?")
             confirm = CLI::UI::Prompt.confirm("Is #{discourse_username} correct?")
             break if confirm
           end
 
-          Discourse::Config.set(host, 'discourse_username', discourse_username)
+          discourse_username
         end
 
-        def configure_vault_directory(host)
+        def configure_vault_directory(domain)
           vault_directory = nil
           loop do
-            vault_directory = CLI::UI::Prompt.ask("Vault directory for #{host}")
+            vault_directory = CLI::UI::Prompt.ask("Vault directory for #{domain}")
             confirm = CLI::UI::Prompt.confirm("Is #{vault_directory} correct?")
             break if confirm
           end
 
-          Discourse::Config.set(host, 'vault_directory', vault_directory)
+          vault_directory
         end
 
         private
 
-        def configured_hosts
-          Discourse::EncryptedCredential.all&.pluck(:host)
+        def configured_domains
+          Discourse::DiscourseSite.all&.pluck(:domain)
         end
 
-        def config_for_host(host)
-          base_url = Discourse::Config.get(host, 'base_url')
-          discourse_username = Discourse::Config.get(host, 'discourse_username')
-          vault_directory = Discourse::Config.get(host, 'vault_directory')
-          [base_url, discourse_username, vault_directory]
+        def config_for_site(domain)
+          site = Discourse::DiscourseSite.find_by(domain:)
+          [site.discourse_username, site.vault_directory]
         end
 
-        def extract_host(url)
+        def extract_domain(url)
           uri = URI.parse(url)
           host = uri.host
-          return [nil, "A domain cannot be extracted from #{url}"] if host.nil?
+          return [nil, "A domain could not be extracted from #{url}"] if host.nil?
 
           [host, '']
         rescue URI::InvalidURIError => e

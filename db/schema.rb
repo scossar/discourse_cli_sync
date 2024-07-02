@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_02_052605) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_02_054700) do
   create_table "directories", force: :cascade do |t|
     t.string "path", null: false
     t.string "archetype", default: "regular", null: false
@@ -36,7 +36,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_02_052605) do
 
   create_table "discourse_sites", force: :cascade do |t|
     t.string "domain", null: false
-    t.string "url", null: false
     t.string "iv"
     t.string "salt"
     t.string "encrypted_api_key"

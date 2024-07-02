@@ -5,6 +5,6 @@ module Discourse
     has_many :notes
 
     validates :domain, presence: true
-    validates :url, presence: true
+    validates :base_url, presence: true
   end
 end
