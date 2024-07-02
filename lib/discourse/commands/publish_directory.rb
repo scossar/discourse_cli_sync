@@ -12,9 +12,8 @@ module Discourse
         discourse_site, api_key = Discourse::Utils::CredentialFrame.credentials_for_site
         Discourse::Utils::InfoFrames.info(discourse_site, api_key)
         directory, use_subdirectories = Discourse::Utils::DirectorySelectorFrame
-                                        .select_directory(discourse_site, true)
-        puts "directory: #{directory}"
-        # Discourse::Utils::CategorySelectorFrame.select(directory, use_subdirectories)
+                                        .select(discourse_site)
+        Discourse::Utils::CategorySelectorFrame.select(directory, use_subdirectories)
       end
 
       def self.help

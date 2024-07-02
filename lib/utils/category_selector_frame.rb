@@ -24,14 +24,15 @@ module Discourse
 
       def self.category_for_directory(directory, category_names)
         category_name = nil
-        fancy_path = Discourse::Utils::Ui.fancy_path(directory.path)
+        short_path = Discourse::Utils::Ui.fancy_path(directory.path)
         loop do
-          category_name = CLI::UI::Prompt.ask("Category for #{fancy_path}",
+          category_name = CLI::UI::Prompt.ask("Category for #{short_path}",
                                               options: category_names)
           confirm = CLI::UI::Prompt.confirm("Is #{category_name} correct?")
           break if confirm
         end
 
+        # TODO: add discourse_site to DiscourseCategory (why is the app supporting multiple sites now?)
         category = Discourse::DiscourseCategory.find_by(name: category_name)
         directory.update(discourse_category: category)
       end
