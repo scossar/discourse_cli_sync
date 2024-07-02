@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_06_30_042043) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_02_051320) do
   create_table "directories", force: :cascade do |t|
     t.string "path", null: false
     t.string "archetype", default: "regular", null: false
@@ -34,14 +34,16 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_30_042043) do
     t.index ["slug"], name: "index_discourse_categories_on_slug", unique: true
   end
 
-  create_table "encrypted_credentials", force: :cascade do |t|
-    t.string "host", null: false
-    t.string "iv", null: false
-    t.string "salt", null: false
-    t.string "encrypted_api_key", null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["host"], name: "index_encrypted_credentials_on_host", unique: true
+  create_table "discourse_sites", force: :cascade do |t|
+    t.string "domain", null: false
+    t.string "url", null: false
+    t.string "iv"
+    t.string "salt"
+    t.string "encrypted_api_key"
+    t.string "base_url", null: false
+    t.string "vault_directory"
+    t.string "discourse_username"
+    t.index ["domain", "discourse_username"], name: "index_discourse_sites_on_domain_and_discourse_username", unique: true
   end
 
   create_table "notes", force: :cascade do |t|
@@ -55,9 +57,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_30_042043) do
     t.integer "directory_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "discourse_site_id"
     t.index ["directory_id", "title"], name: "index_notes_on_directory_id_and_title", unique: true
     t.index ["directory_id"], name: "index_notes_on_directory_id"
     t.index ["discourse_category_id"], name: "index_notes_on_discourse_category_id"
+    t.index ["discourse_site_id"], name: "index_notes_on_discourse_site_id"
     t.index ["post_id"], name: "index_notes_on_post_id", unique: true
     t.index ["topic_id"], name: "index_notes_on_topic_id", unique: true
     t.index ["topic_url"], name: "index_notes_on_topic_url", unique: true
@@ -66,4 +70,5 @@ ActiveRecord::Schema[7.1].define(version: 2024_06_30_042043) do
   add_foreign_key "directories", "discourse_categories"
   add_foreign_key "notes", "directories"
   add_foreign_key "notes", "discourse_categories"
+  add_foreign_key "notes", "discourse_sites"
 end
