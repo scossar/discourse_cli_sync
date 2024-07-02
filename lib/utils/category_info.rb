@@ -6,8 +6,8 @@ require_relative '../models/discourse_category'
 module Discourse
   module Utils
     module CategoryInfo
-      def self.category_loader(host, api_key)
-        fetcher = DiscourseCategoryFetcher.new(host, api_key)
+      def self.category_loader(site, api_key)
+        fetcher = DiscourseCategoryFetcher.new(site, api_key)
 
         spin_group = CLI::UI::SpinGroup.new
 

@@ -6,13 +6,13 @@ require_relative '../utils/ui_utils'
 module Discourse
   module Utils
     module VaultInfo
-      def self.directory_loader(host)
-        directory_info(host)
+      def self.directory_loader(site)
+        vault_directory = site.vault_directory
+        directory_info(vault_directory)
       end
 
-      def self.directory_info(host)
-        vault_dir = Discourse::Config.get(host, 'vault_directory')
-        directories = all_directories(vault_dir)
+      def self.directory_info(vault_directory)
+        directories = all_directories(vault_directory)
         directories.each do |directory|
           fancy_path = Discourse::Utils::Ui.fancy_path(directory)
           CLI::UI::Frame.open(fancy_path) do

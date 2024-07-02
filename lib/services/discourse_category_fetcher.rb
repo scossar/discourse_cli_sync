@@ -6,8 +6,8 @@ module Discourse
   class DiscourseCategoryFetcher
     attr_reader :categories
 
-    def initialize(host, api_key)
-      @categories = fetch_categories(host, api_key)
+    def initialize(site, api_key)
+      @categories = fetch_categories(site, api_key)
     end
 
     def category_names
@@ -23,8 +23,8 @@ module Discourse
 
     private
 
-    def fetch_categories(host, api_key)
-      client = DiscourseRequest.new(host, api_key)
+    def fetch_categories(site, api_key)
+      client = DiscourseRequest.new(site, api_key)
       site_info = client.site_info
       categories = site_info['categories']
       parsed_categories = parse_categories(categories)

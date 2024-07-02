@@ -10,9 +10,9 @@ module Discourse
   class FaradayClient
     DEFAULT_TIMEOUT = 30
 
-    def initialize(host, api_key)
-      @api_username = Discourse::Config.get(host, 'discourse_username')
-      @base_url = Discourse::Config.get(host, 'base_url')
+    def initialize(site, api_key)
+      @api_username = site.discourse_username
+      @base_url = site.base_url
       @api_key = api_key
     end
 
