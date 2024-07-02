@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_02_051320) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_02_052605) do
   create_table "directories", force: :cascade do |t|
     t.string "path", null: false
     t.string "archetype", default: "regular", null: false
@@ -58,7 +58,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_02_051320) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "discourse_site_id"
-    t.index ["directory_id", "title"], name: "index_notes_on_directory_id_and_title", unique: true
+    t.index ["directory_id", "discourse_site_id", "title"], name: "index_notes_on_directory_id_and_discourse_site_id_and_title", unique: true
     t.index ["directory_id"], name: "index_notes_on_directory_id"
     t.index ["discourse_category_id"], name: "index_notes_on_discourse_category_id"
     t.index ["discourse_site_id"], name: "index_notes_on_discourse_site_id"

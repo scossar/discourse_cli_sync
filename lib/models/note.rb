@@ -2,6 +2,7 @@
 
 module Discourse
   class Note < ActiveRecord::Base
+    belongs_to :discourse_site
     belongs_to :directory, optional: true
     belongs_to :discourse_category, optional: true
 
