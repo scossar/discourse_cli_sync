@@ -8,5 +8,6 @@ module Discourse
 
     validates :path, presence: true, uniqueness: true
     validates :archetype, presence: true, inclusion: { in: %w[regular personal_message] }
+    validates :discourse_site, presence: true
   end
 end

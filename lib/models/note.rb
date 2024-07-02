@@ -11,5 +11,6 @@ module Discourse
     validates :topic_url, uniqueness: true
     validates :topic_id, uniqueness: true
     validates :post_id, uniqueness: true
+    validates :discourse_site, presence: true
   end
 end

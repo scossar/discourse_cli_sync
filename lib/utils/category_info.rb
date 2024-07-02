@@ -24,33 +24,35 @@ module Discourse
 
         spin_group.wait
 
-        category_info(categories)
+        category_info(categories, site)
         [categories, category_names]
       end
 
-      def self.category_info(categories)
+      def self.category_info(categories, site)
         categories.each_value do |category|
           CLI::UI::Frame.open(category[:name]) do
-            create_or_update_category(category)
+            create_or_update_category(category, site)
             puts CLI::UI.fmt "read_restricted: #{category[:read_restricted]}"
             puts CLI::UI.fmt category[:description_excerpt]
           end
         end
       end
 
-      def self.create_or_update_category(category)
+      def self.create_or_update_category(category, site)
         spin_group = CLI::UI::SpinGroup.new
         spin_group.failure_debrief do |_title, exception|
           puts CLI::UI.fmt "  #{exception}"
         end
 
+        # TODO: add discourse_site
         spin_group.add('Updating Categories') do |spinner|
           Discourse::DiscourseCategory
             .create_or_update(name: category[:name],
                               slug: category[:slug],
                               read_restricted: category[:read_restricted],
                               description: category[:description_excerpt],
-                              discourse_id: category[:id])
+                              discourse_id: category[:id],
+                              discourse_site: site)
           spinner.update_title("Updated info for #{category[:name]}")
         end
 
