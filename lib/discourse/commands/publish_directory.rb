@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../../utils/discourse_config'
+require_relative '../../utils/configure_host'
 
 module Discourse
   module Commands
@@ -15,7 +16,8 @@ module Discourse
 
       def credential_frames
         CLI::UI::Frame.open('Discourse credentials') do
-          host = Discourse::Utils::DiscourseConfig.call
+          host = Discourse::Utils::ConfigureHost.call
+          puts "host: #{host}"
         end
       end
     end
