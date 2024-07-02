@@ -45,7 +45,7 @@ module Discourse
         end
 
         def confirm_site(domain)
-          site = Discourse::DiscourseSite.find_by(domain)
+          site = Discourse::DiscourseSite.find_by(domain:)
           discourse_username, vault_directory = config_for_site(site)
           confirm_prompt = CLI::UI.fmt("Existing configuration for #{domain}\n  " \
                                        "discourse_username: #{discourse_username}\n  " \

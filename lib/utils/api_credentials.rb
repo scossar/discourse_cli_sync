@@ -10,8 +10,8 @@ module Discourse
   module Utils
     class ApiCredentials
       class << self
-        def call(domain)
-          discourse_site = Discourse::DiscourseSite.find_by(domain:)
+        def call(discourse_site)
+          domain = discourse_site.domain
           credentials_for_site(discourse_site, domain)
         end
 
@@ -49,12 +49,12 @@ module Discourse
             password = AskPassword.ask_and_confirm_password(ask_password_prompt,
                                                             password_confirm_prompt,
                                                             password_mismatch_prompt)
-            set_api_key(domain, password)
+            set_api_key(discourse_site:, domain:, password:)
             password
           end
         end
 
-        def set_api_key(domain, password)
+        def set_api_key(discourse_site:, domain:, password:)
           unencrypted_key, key_start = nil
           loop do
             unencrypted_key = ask_password(api_key_prompt(domain))
@@ -63,7 +63,8 @@ module Discourse
             break if confirm
           end
           iv, salt, encrypted_api_key = Encryption.encrypt(password, unencrypted_key)
-          EncryptedCredential.create(host:, iv:, salt:, encrypted_api_key:)
+          discourse_site.update(iv:, salt:, encrypted_api_key:)
+          password
         end
 
         def ask_password(prompt)
