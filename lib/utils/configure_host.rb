@@ -37,17 +37,40 @@ module Discourse
         end
 
         def add_host
-          host = base_url
-          username(host)
-          vault_directory(host)
+          host = configure_base_url
+          configure_username(host)
+          configure_vault_directory(host)
           host
         end
 
         def confirm_host(host)
           base_url, discourse_username, vault_directory = config_for_host(host)
+          confirm_prompt = CLI::UI.fmt("Existing configuration for #{host}\n  " \
+                                       "base_url: #{base_url}\n  " \
+                                       "discourse_username: #{discourse_username}\n  " \
+                                       "vault_directory: #{vault_directory}\n" \
+                                       'Are these values correct?')
+          confirm = CLI::UI::Prompt.confirm(confirm_prompt)
+          return host if confirm
+
+          update_config(host:, base_url:, discourse_username:, vault_directory:)
         end
 
-        def base_url
+        def update_config(host:, base_url:, discourse_username:, vault_directory:)
+          update_base_url = CLI::UI::Prompt.confirm("Update base URL: #{base_url}?")
+          update_host_entry(host) if update_base_url
+          update_username = CLI::UI::Prompt.confirm("Update username: #{discourse_username}?")
+          configure_username(host) if update_username
+          update_vault_directory = CLI::UI::Prompt.confirm("Update vault directory: #{vault_directory}?")
+          configure_vault_directory(host) if update_vault_directory
+          host
+        end
+
+        def update_host_entry(host)
+          puts CLI::UI.fmt("TODO: fix this. host: #{host}")
+        end
+
+        def configure_base_url
           base_url, host = nil
           loop do
             base_url = CLI::UI::Prompt.ask('Discourse base URL')
@@ -62,7 +85,7 @@ module Discourse
           host
         end
 
-        def username(host)
+        def configure_username(host)
           discourse_username = nil
           loop do
             discourse_username = CLI::UI::Prompt.ask("Discourse username for #{host}?")
@@ -73,7 +96,7 @@ module Discourse
           Discourse::Config.set(host, 'discourse_username', discourse_username)
         end
 
-        def vault_directory(host)
+        def configure_vault_directory(host)
           vault_directory = nil
           loop do
             vault_directory = CLI::UI::Prompt.ask("Vault directory for #{host}")
