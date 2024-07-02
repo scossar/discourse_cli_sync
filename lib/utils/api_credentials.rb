@@ -2,7 +2,7 @@
 
 require_relative 'ask_password'
 require_relative 'encryption'
-require_relative '../models/encrypted_credential'
+require_relative '../models/discourse_site'
 
 require_relative 'logger'
 
@@ -10,8 +10,9 @@ module Discourse
   module Utils
     class ApiCredentials
       class << self
-        def call(host)
-          credentials_for_host(host)
+        def call(domain)
+          discourse_site = Discourse::DiscourseSite.find_by(domain:)
+          credentials_for_site(discourse_site, domain)
         end
 
         def ask_password_prompt
@@ -26,46 +27,39 @@ module Discourse
           'Passwords did not match. Please try again'
         end
 
-        def api_key_prompt(host)
-          "Your Discourse API key for #{host}"
+        def api_key_prompt(domain)
+          "Your Discourse API key for #{domain}"
         end
 
-        def api_key_confirm_prompt(host, truncated_key)
-          "Confirm that the key starting with #{truncated_key} is correct for #{host}"
+        def api_key_confirm_prompt(domain, truncated_key)
+          "Confirm that the key starting with #{truncated_key} is correct for #{domain}"
         end
 
-        def credentials(host)
-          encrypted_credentials = EncryptedCredential.find_by(host:)
-
-          return [nil, nil, nil] unless encrypted_credentials
-
-          iv = encrypted_credentials.iv
-          salt = encrypted_credentials.salt
-          encrypted_api_key = encrypted_credentials.encrypted_api_key
-          [iv, salt, encrypted_api_key]
+        def credentials(discourse_site)
+          [discourse_site&.iv, discourse_site&.salt, discourse_site&.encrypted_api_key]
         end
 
-        def credentials_for_host(host)
-          iv, salt, encrypted_api_key = credentials(host)
+        def credentials_for_site(discourse_site, domain)
+          iv, salt, encrypted_api_key = credentials(discourse_site)
 
           if iv && salt && encrypted_api_key
-            puts CLI::UI.fmt "Api credentials are configured for #{host}"
+            puts CLI::UI.fmt "Api credentials are configured for #{domain}"
             nil
           else
             password = AskPassword.ask_and_confirm_password(ask_password_prompt,
                                                             password_confirm_prompt,
                                                             password_mismatch_prompt)
-            set_api_key(host, password)
+            set_api_key(domain, password)
             password
           end
         end
 
-        def set_api_key(host, password)
+        def set_api_key(domain, password)
           unencrypted_key, key_start = nil
           loop do
-            unencrypted_key = ask_password(api_key_prompt(host))
+            unencrypted_key = ask_password(api_key_prompt(domain))
             key_start = unencrypted_key[0, 4]
-            confirm = confirm(api_key_confirm_prompt(host, key_start))
+            confirm = confirm(api_key_confirm_prompt(domain, key_start))
             break if confirm
           end
           iv, salt, encrypted_api_key = Encryption.encrypt(password, unencrypted_key)

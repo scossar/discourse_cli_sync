@@ -40,32 +40,33 @@ module Discourse
           domain, base_url = configure_base_url
           discourse_username = configure_username(domain)
           vault_directory = configure_vault_directory(domain)
-          Discourse::DiscourseSite.create(domain:, base_url:, discourse_username:, vault_directory:)
-          domain
+          Discourse::DiscourseSite.create(domain:, base_url:, discourse_username:,
+                                          vault_directory:)
         end
 
         def confirm_site(domain)
-          discourse_username, vault_directory = config_for_site(domain)
+          site = Discourse::DiscourseSite.find_by(domain)
+          discourse_username, vault_directory = config_for_site(site)
           confirm_prompt = CLI::UI.fmt("Existing configuration for #{domain}\n  " \
                                        "discourse_username: #{discourse_username}\n  " \
                                        "vault_directory: #{vault_directory}\n" \
                                        'Are these values correct?')
           confirm = CLI::UI::Prompt.confirm(confirm_prompt)
-          return domain if confirm
+          return site if confirm
 
           update_config(domain:, discourse_username:, vault_directory:)
         end
 
         def update_config(domain:, discourse_username:, vault_directory:)
+          site = Discourse::DiscourseSite.find_by(domain:)
           update_username = CLI::UI::Prompt.confirm("Update username: #{discourse_username}?")
           discourse_username = configure_username(domain) if update_username
           update_vault_directory = CLI::UI::Prompt.confirm("Update vault directory: #{vault_directory}?")
           vault_directory = configure_vault_directory(domain) if update_vault_directory
           if update_username || update_vault_directory
-            site = Discourse::DiscourseSite.find_by(domain:)
             site.update(discourse_username:, vault_directory:)
           end
-          domain
+          site
         end
 
         def configure_base_url
@@ -110,8 +111,7 @@ module Discourse
           Discourse::DiscourseSite.all&.pluck(:domain)
         end
 
-        def config_for_site(domain)
-          site = Discourse::DiscourseSite.find_by(domain:)
+        def config_for_site(site)
           [site.discourse_username, site.vault_directory]
         end
 

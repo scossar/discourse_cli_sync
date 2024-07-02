@@ -1,13 +1,13 @@
 # frozen_string_literal: true
 
-require_relative '../../utils/discourse_config'
+require_relative '../../utils/api_credentials'
 require_relative '../../utils/configure_host'
 
 module Discourse
   module Commands
     class PublishDirectory < Discourse::Command
       def call(_args, _name)
-        host = credential_frames
+        domain, api_key = credential_frames
       end
 
       def self.help
@@ -16,8 +16,9 @@ module Discourse
 
       def credential_frames
         CLI::UI::Frame.open('Discourse credentials') do
-          host = Discourse::Utils::ConfigureHost.call
-          puts "host: #{host}"
+          discourse_site = Discourse::Utils::ConfigureHost.call
+          password = Discourse::Utils::ApiCredentials.call(discourse_site)
+          puts "password: #{password}"
         end
       end
     end
