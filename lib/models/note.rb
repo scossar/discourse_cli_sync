@@ -3,7 +3,7 @@
 module Discourse
   class Note < ActiveRecord::Base
     belongs_to :discourse_site
-    belongs_to :directory, optional: true
+    belongs_to :directory
     belongs_to :discourse_category, optional: true
 
     validates :title, presence: true, uniqueness: { scope: %i[directory_id discourse_site_id] }
