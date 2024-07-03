@@ -20,6 +20,7 @@ module Discourse
             category_for_directory(dir, category_names, discourse_site)
           end
         end
+        directories
       end
 
       def self.category_for_directory(directory, category_names, discourse_site)
