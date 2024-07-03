@@ -4,7 +4,9 @@ module Discourse
   class Directory < ActiveRecord::Base
     has_many :notes
     belongs_to :discourse_site
-    belongs_to :discourse_category, optional: true
+    # TODO: it discourse_category should be optional, but not for now
+    # belongs_to :discourse_category, optional: true
+    belongs_to :discourse_category
 
     validates :path, presence: true, uniqueness: true
     validates :archetype, presence: true, inclusion: { in: %w[regular personal_message] }
