@@ -32,7 +32,7 @@ module Discourse
           if dir.discourse_category
             handle_configured_category(dir:, configured_category: dir.discourse_category)
           else
-            configure_category(directory)
+            configure_category(dir)
           end
         end
 
