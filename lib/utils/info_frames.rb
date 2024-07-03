@@ -14,6 +14,8 @@ module Discourse
           vault_info_frame
         end
 
+        private
+
         def site_info_frame
           CLI::UI::Frame.open('Discourse info') do
             categories, category_names = Discourse::Utils::CategoryInfo
