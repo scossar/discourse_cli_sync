@@ -12,11 +12,11 @@ module Discourse
       def call(_args, _name)
         discourse_site, api_key = Discourse::Utils::CredentialFrame.credentials_for_site
         Discourse::Utils::InfoFrames.info(discourse_site, api_key)
-        directory, use_subdirectories = Discourse::Utils::DirectorySelectorFrame
-                                        .select(discourse_site)
-        directories = Discourse::Utils::CategorySelectorFrame.select(directory, use_subdirectories,
+        root_directory, use_subdirectories = Discourse::Utils::DirectorySelectorFrame
+                                             .select(discourse_site)
+        directories = Discourse::Utils::CategorySelectorFrame.select(root_directory, use_subdirectories,
                                                                      discourse_site)
-        Discourse::Utils::PublishDirectoryFrame(directories)
+        Discourse::Utils::PublishDirectoryFrame.publish(root_directory:, directories:)
       end
 
       def self.help
