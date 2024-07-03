@@ -10,16 +10,15 @@ module Discourse
       end
 
       def self.publish_frame(root_directory, directories)
-        short_path = short_path(root_directory)
-        CLI::UI::Frame.open("Publishing notes from #{short_path}") do
-          directories.each do |directory|
+        directories.each do |directory|
+          short_path = short_path(root_directory)
+          CLI::UI::Frame.open("Publishing notes from #{short_path}") do
             publish_directory(directory)
           end
         end
       end
 
       def self.publish_directory(directory)
-        short_path = short_path(directory)
         spin_group = CLI::UI::SpinGroup.new
 
         spin_group.failure_debrief do |_title, exception|
@@ -28,15 +27,13 @@ module Discourse
 
         _paths, titles, titles_path_hash = notes_for_directory(directory)
 
-        CLI::UI::Frame.open("Publishing #{short_path}") do
-          titles.each do |title|
-            spin_group.add("Publishing #{title}") do |spinner|
-              sleep 1.0
-              spinner.update_title "Published (full path) #{path_from_title(titles_path_hash,
-                                                                            title)}"
-            end
-            spin_group.wait
+        titles.each do |title|
+          spin_group.add("Publishing #{title}") do |spinner|
+            sleep 1.0
+            spinner.update_title "Published (full path) #{path_from_title(titles_path_hash,
+                                                                          title)}"
           end
+          spin_group.wait
         end
       end
 
