@@ -2,6 +2,7 @@
 
 require_relative '../models/discourse_category'
 require_relative '../models/directory'
+require_relative 'recategorize_notes_frame'
 require_relative 'ui_utils'
 
 module Discourse
@@ -50,6 +51,10 @@ module Discourse
           return unless confirm
 
           configure_category(dir)
+
+          Discourse::Utils::RecategorizeNotesFrame.call(directory: dir,
+                                                        discourse_site: @discourse_site,
+                                                        api_key: @api_key)
         end
 
         def configure_category(dir)
