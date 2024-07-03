@@ -10,9 +10,9 @@ require_relative 'discourse_request'
 module Discourse
   module Services
     class Publisher
-      def initialize(note_path:, category:, api_key:, discourse_site:)
+      def initialize(note_path:, directory:, api_key:, discourse_site:)
         @note_path = note_path
-        @category = category
+        @directory = directory
         @api_key = api_key
         @discourse_site = discourse_site
         @client = DiscourseRequest.new(discourse_site, api_key)
@@ -35,8 +35,10 @@ module Discourse
       end
 
       def handle_internal_links(markdown)
-        internal_link_handler = InternalLinkHandler.new(host: @host, api_key: @api_key, markdown:,
-                                                        category: @category)
+        internal_link_handler = InternalLinkHandler.new(api_key: @api_key,
+                                                        discourse_site: @discourse_site,
+                                                        directory: @directory,
+                                                        markdown:)
         internal_link_handler.handle
       end
 
@@ -55,7 +57,7 @@ module Discourse
         topic_id = post_data['topic_id']
         post_id = post_data['id']
         Note.create(title:, topic_url:, topic_id:, post_id:,
-                    discourse_category: @category).tap do |note|
+                    discourse_category: @directory.discourse_category).tap do |note|
           raise Discourse::Errors::BaseError, 'Note could not be created' unless note.persisted?
         end
       rescue StandardError => e

@@ -28,7 +28,7 @@ module Discourse
 
           paths.each do |note_path|
             Discourse::Utils::NotePublisher.call(note_path:,
-                                                 category: directory.discourse_category,
+                                                 directory:,
                                                  api_key: @api_key,
                                                  discourse_site: @discourse_site)
           end
