@@ -44,7 +44,6 @@ module Discourse
           puts CLI::UI.fmt "  #{exception}"
         end
 
-        # TODO: add discourse_site
         spin_group.add('Updating Categories') do |spinner|
           Discourse::DiscourseCategory
             .create_or_update(name: category[:name],
