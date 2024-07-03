@@ -18,10 +18,9 @@ module Discourse
       description = params[:description]
       discourse_id = params[:discourse_id]
       discourse_site = params[:discourse_site]
-      category = DiscourseCategory.find_by(name:, discourse_site:)
+      category = DiscourseCategory.find_by(discourse_id:, discourse_site:)
       if category
-        category.update(name:, slug:, read_restricted:, description:, discourse_id:,
-                        discourse_site:)
+        category.update(name:, slug:, read_restricted:, description:)
       else
         DiscourseCategory.create(name:, slug:, read_restricted:, description:, discourse_id:,
                                  discourse_site:)
