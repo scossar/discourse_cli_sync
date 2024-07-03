@@ -17,7 +17,8 @@ module Discourse
         directories = Discourse::Utils::CategorySelectorFrame.select(root_directory,
                                                                      use_subdirectories,
                                                                      discourse_site)
-        Discourse::Utils::DirectoryPublisher.call(root_directory:, directories:)
+        Discourse::Utils::DirectoryPublisher.call(root_directory:, directories:, api_key:,
+                                                  discourse_site:)
       end
 
       def self.help

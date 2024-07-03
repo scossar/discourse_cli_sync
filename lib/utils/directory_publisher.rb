@@ -6,12 +6,15 @@ module Discourse
   module Utils
     class DirectoryPublisher
       class << self
-        def call(root_directory:, directories:)
-          publish_frame(root_directory, directories)
+        def call(root_directory:, directories:, api_key:, discourse_site:)
+          @directories = directories
+          @api_key = api_key
+          @discourse_site = discourse_site
+          publish_frame(root_directory)
         end
 
-        def publish_frame(root_directory, directories)
-          directories.each do |directory|
+        def publish_frame(root_directory)
+          @directories.each do |directory|
             short_path = short_path(root_directory)
             CLI::UI::Frame.open("Publishing notes from #{short_path}") do
               publish_directory(directory)
