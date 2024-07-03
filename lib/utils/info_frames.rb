@@ -5,22 +5,27 @@ require_relative 'vault_info'
 
 module Discourse
   module Utils
-    module InfoFrames
-      def self.info(site, api_key)
-        site_info_frame(site, api_key)
-        vault_info_frame(site)
-      end
-
-      def self.site_info_frame(site, api_key)
-        CLI::UI::Frame.open('Discourse info') do
-          categories, category_names = Discourse::Utils::CategoryInfo.category_loader(site, api_key)
-          [categories, category_names]
+    class InfoFrames
+      class << self
+        def call(discourse_site:, api_key:)
+          @discourse_site = discourse_site
+          @api_key = api_key
+          site_info_frame
+          vault_info_frame
         end
-      end
 
-      def self.vault_info_frame(site)
-        CLI::UI::Frame.open('Vault info') do
-          Discourse::Utils::VaultInfo.directory_loader(site)
+        def site_info_frame
+          CLI::UI::Frame.open('Discourse info') do
+            categories, category_names = Discourse::Utils::CategoryInfo
+                                         .category_loader(@discourse_site, @api_key)
+            [categories, category_names]
+          end
+        end
+
+        def vault_info_frame
+          CLI::UI::Frame.open('Vault info') do
+            Discourse::Utils::VaultInfo.directory_loader(@discourse_site)
+          end
         end
       end
     end

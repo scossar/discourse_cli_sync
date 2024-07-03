@@ -11,7 +11,7 @@ module Discourse
     class PublishDirectory < Discourse::Command
       def call(_args, _name)
         discourse_site, api_key = Discourse::Utils::CredentialFrame.credentials_for_site
-        Discourse::Utils::InfoFrames.info(discourse_site, api_key)
+        Discourse::Utils::InfoFrames.call(discourse_site:, api_key:)
         # root_directory, use_subdirectories = Discourse::Utils::DirectorySelectorFrame
         # .select(discourse_site)
         # directories = Discourse::Utils::CategorySelectorFrame.call(directory: root_directory,
