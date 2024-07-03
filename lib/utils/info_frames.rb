@@ -18,9 +18,7 @@ module Discourse
 
         def site_info_frame
           CLI::UI::Frame.open('Discourse info') do
-            categories, category_names = Discourse::Utils::CategoryInfo
-                                         .category_loader(@discourse_site, @api_key)
-            [categories, category_names]
+            Discourse::Utils::CategoryInfo.call(discourse_site: @discourse_site, api_key: @api_key)
           end
         end
 
