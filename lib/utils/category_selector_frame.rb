@@ -23,6 +23,7 @@ module Discourse
         directories
       end
 
+      # TODO: check to see if a category has already been configured for the directory
       def self.category_for_directory(directory, category_names, discourse_site)
         category_name = nil
         short_path = Discourse::Utils::Ui.fancy_path(directory.path)

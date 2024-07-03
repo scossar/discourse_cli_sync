@@ -25,6 +25,7 @@ module Discourse
             confirm = CLI::UI::Prompt.confirm("Is #{directory} correct?")
             break if confirm
           end
+          # TODO: don't ask about subdirectories if there are no subdirectories
           if confirm_subdirectories
             subdirectories = CLI::UI::Prompt.confirm("Also select subdirectories of #{directory}?")
           end

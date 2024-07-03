@@ -16,7 +16,7 @@ module Discourse
                                              .select(discourse_site)
         directories = Discourse::Utils::CategorySelectorFrame.select(root_directory, use_subdirectories,
                                                                      discourse_site)
-        Discourse::Utils::PublishDirectoryFrame.publish(root_directory:, directories:)
+        Discourse::Utils::PublishDirectoryFrame.publish_directories(root_directory:, directories:)
       end
 
       def self.help
