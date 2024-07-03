@@ -43,7 +43,8 @@ module Discourse
       end
 
       def create_topic(title, markdown)
-        @client.create_topic(title:, markdown:, category: @category.discourse_id).tap do |response|
+        @client.create_topic(title:, markdown:,
+                             category: @directory.discourse_category.discourse_id).tap do |response|
           unless response
             raise Discourse::Errors::BaseError,
                   "Failed to create topic for #{title}"
@@ -57,7 +58,8 @@ module Discourse
         topic_id = post_data['topic_id']
         post_id = post_data['id']
         Note.create(title:, topic_url:, topic_id:, post_id:,
-                    discourse_category: @directory.discourse_category).tap do |note|
+                    discourse_category: @directory.discourse_category,
+                    discourse_site: @discourse_site).tap do |note|
           raise Discourse::Errors::BaseError, 'Note could not be created' unless note.persisted?
         end
       rescue StandardError => e

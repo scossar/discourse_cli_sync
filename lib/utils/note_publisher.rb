@@ -24,7 +24,7 @@ module Discourse
 
           markdown = attachments_task(spin_group:, title:, markdown:)
           markdown = internal_links_task(spin_group:, title:, markdown:)
-          # publish_task(spin_group:, title:, markdown:)
+          publish_task(spin_group:, title:, markdown:)
         end
 
         def attachments_task(spin_group:, title:, markdown:)
