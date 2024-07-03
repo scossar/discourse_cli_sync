@@ -6,12 +6,12 @@ require_relative '../errors/errors'
 module Discourse
   module Services
     class AttachmentHandler
-      def initialize(host:, api_key:, markdown:)
-        @host = host
+      def initialize(api_key:, discourse_site:, markdown:)
         @api_key = api_key
+        @discourse_site = discourse_site
         @markdown = markdown
         @attachment_tag_regex = /!\[\[(.*?)\]\]/
-        @uploads_dir = Discourse::Config.get(host, 'vault_directory')
+        @uploads_dir = @discourse_site.vault_directory
       end
 
       def convert
@@ -37,7 +37,7 @@ module Discourse
       def upload_image(image_path)
         puts "Uploading file '#{image_path}'"
         expanded_path = File.expand_path(image_path)
-        client = DiscourseRequest.new(@host, @api_key)
+        client = DiscourseRequest.new(@discourse_site, @api_key)
         client.upload_file(expanded_path)
       end
     end

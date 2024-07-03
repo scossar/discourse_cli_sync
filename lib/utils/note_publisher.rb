@@ -8,8 +8,9 @@ module Discourse
   module Utils
     class NotePublisher
       class << self
-        def call(host:, api_key:, note:, category:)
-          @publisher = Discourse::Services::Publisher.new(host:, api_key:, note:, category:)
+        def call(note_path:, category:, api_key:, discourse_site:)
+          @publisher = Discourse::Services::Publisher.new(note_path:, category:, api_key:,
+                                                          discourse_site:)
           title, _front_matter, markdown = @publisher.parse_file
           publishing_frame(title, markdown)
         end
@@ -22,8 +23,8 @@ module Discourse
           end
 
           markdown = attachments_task(spin_group:, title:, markdown:)
-          markdown = internal_links_task(spin_group:, title:, markdown:)
-          publish_task(spin_group:, title:, markdown:)
+          # markdown = internal_links_task(spin_group:, title:, markdown:)
+          # publish_task(spin_group:, title:, markdown:)
         end
 
         def attachments_task(spin_group:, title:, markdown:)

@@ -10,17 +10,17 @@ require_relative 'discourse_request'
 module Discourse
   module Services
     class Publisher
-      def initialize(host:, api_key:, note:, category:)
-        @host = host
-        @api_key = api_key
-        @note = note
+      def initialize(note_path:, category:, api_key:, discourse_site:)
+        @note_path = note_path
         @category = category
-        @client = DiscourseRequest.new(@host, @api_key)
+        @api_key = api_key
+        @discourse_site = discourse_site
+        @client = DiscourseRequest.new(discourse_site, api_key)
       end
 
       def parse_file
-        title = File.basename(@note, '.md')
-        content = File.read(@note)
+        title = File.basename(@note_path, '.md')
+        content = File.read(@note_path)
         parsed = FrontMatterParser::Parser.new(:md).call(content)
         front_matter = parsed.front_matter
         markdown = parsed.content
@@ -28,7 +28,9 @@ module Discourse
       end
 
       def handle_attachments(markdown)
-        attachment_handler = AttachmentHandler.new(host: @host, api_key: @api_key, markdown:)
+        attachment_handler = AttachmentHandler.new(api_key: @api_key,
+                                                   discourse_site: @discourse_site,
+                                                   markdown:)
         attachment_handler.convert
       end
 

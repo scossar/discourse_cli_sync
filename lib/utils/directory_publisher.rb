@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative 'note_publisher'
 require_relative 'ui_utils'
 
 module Discourse
@@ -23,21 +24,13 @@ module Discourse
         end
 
         def publish_directory(directory)
-          spin_group = CLI::UI::SpinGroup.new
+          paths, _titles, _titles_path_hash = notes_for_directory(directory)
 
-          spin_group.failure_debrief do |_title, exception|
-            puts CLI::UI.fmt "  #{exception}"
-          end
-
-          _paths, titles, titles_path_hash = notes_for_directory(directory)
-
-          titles.each do |title|
-            spin_group.add("Publishing #{title}") do |spinner|
-              sleep 1.0
-              spinner.update_title "Published (full path) #{path_from_title(titles_path_hash,
-                                                                            title)}"
-            end
-            spin_group.wait
+          paths.each do |note_path|
+            Discourse::Utils::NotePublisher.call(note_path:,
+                                                 category: directory.discourse_category,
+                                                 api_key: @api_key,
+                                                 discourse_site: @discourse_site)
           end
         end
 
