@@ -69,7 +69,11 @@ module Discourse
 
       def self.category_frame_title(path, count)
         fancy_path = Discourse::Utils::Ui.fancy_path(path)
-        count == 1 ? "Configure category for #{fancy_path}" : "Configure categories for #{fancy_path}"
+        if count == 1
+          "Configure category for #{fancy_path}"
+        else
+          "Configure categories for #{fancy_path}"
+        end
       end
 
       def self.discourse_category_names

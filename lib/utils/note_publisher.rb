@@ -15,6 +15,8 @@ module Discourse
           publishing_frame(title, markdown)
         end
 
+        private
+
         def publishing_frame(title, markdown)
           spin_group = CLI::UI::SpinGroup.new
 
