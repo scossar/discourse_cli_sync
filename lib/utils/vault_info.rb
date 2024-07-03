@@ -28,8 +28,8 @@ module Discourse
 
         spin_group.add('Updating Directories') do |spinner|
           Discourse::Directory.find_or_create_by(discourse_site:, path:)
-          fancy_path = Discourse::Utils::Ui.fancy_path(path)
-          spinner.update_title("Updated database entry for #{fancy_path}")
+          short_path = Discourse::Utils::Ui.fancy_path(path)
+          spinner.update_title("Updated database entry for #{short_path}")
         end
 
         spin_group.wait

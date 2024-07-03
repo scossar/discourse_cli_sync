@@ -7,22 +7,22 @@ require_relative 'ui_utils'
 module Discourse
   module Utils
     module CategorySelectorFrame
-      def self.select(directory, use_subdirectories)
-        selector_frame(directory, use_subdirectories)
+      def self.select(directory, use_subdirectories, discourse_site)
+        selector_frame(directory, use_subdirectories, discourse_site)
       end
 
-      def self.selector_frame(directory, use_subdirectories)
+      def self.selector_frame(directory, use_subdirectories, discourse_site)
         path = directory.path
-        directories = use_subdirectories ? sub_directories(path) : directory
+        directories = use_subdirectories ? sub_directories(path) : [directory]
         category_names = discourse_category_names
         CLI::UI::Frame.open(category_frame_title(path, directories.length)) do
           directories.each do |dir|
-            category_for_directory(dir, category_names)
+            category_for_directory(dir, category_names, discourse_site)
           end
         end
       end
 
-      def self.category_for_directory(directory, category_names)
+      def self.category_for_directory(directory, category_names, discourse_site)
         category_name = nil
         short_path = Discourse::Utils::Ui.fancy_path(directory.path)
         loop do
@@ -32,8 +32,7 @@ module Discourse
           break if confirm
         end
 
-        # TODO: add discourse_site to DiscourseCategory (why is the app supporting multiple sites now?)
-        category = Discourse::DiscourseCategory.find_by(name: category_name)
+        category = Discourse::DiscourseCategory.find_by(name: category_name, discourse_site:)
         directory.update(discourse_category: category)
       end
 
