@@ -17,6 +17,12 @@ module Discourse
       @faraday_client.post('/posts.json', params)
     end
 
+    def update_topic(topic_id:, category:)
+      path = "/t/-/#{topic_id}.json"
+      params = { category: }
+      @faraday_client.put(path, params)
+    end
+
     def update_post(markdown:, post_id:)
       params = { post: { raw: markdown } }
       @faraday_client.put("/posts/#{post_id}.json", params)

@@ -26,22 +26,27 @@ module Discourse
       def self.category_for_directory(directory, category_names, discourse_site)
         configured_category = directory.discourse_category
         if configured_category
-          handle_configured_category(directory, configured_category)
+          handle_configured_category(directory:, configured_category:, category_names:,
+                                     discourse_site:)
         else
           configured_category(directory, category_names, discourse_site)
         end
       end
 
-      def self.handle_configured_category(directory, category)
+      def self.handle_configured_category(directory:, configured_category:, category_names:,
+                                          discourse_site:)
         short_path = Discourse::Utils::Ui.fancy_path(directory.path)
-        reconfigure = CLI::UI::Prompt.confirm("#{short_path} has been configured to publish notes to #{category.name} " \
-                                              'Would you like to reconfigure it?')
+        reconfigure = CLI::UI::Prompt
+                      .confirm("#{short_path} has been configured to publish notes " \
+                               "to #{configured_category.name}. Would you like to reconfigure it?")
+
         return unless reconfigure
 
-        confirm = CLI::UI::Prompt.confirm("Confirm that you want to change the category for #{short_path}")
+        confirm = CLI::UI::Prompt
+                  .confirm("Confirm that you want to change the category for #{short_path}")
         return unless confirm
 
-        puts 'Hmmm'
+        configure_category(directory, category_names, discourse_site)
       end
 
       def self.configure_category(directory, category_names, discourse_site)
