@@ -4,7 +4,7 @@ require_relative '../../utils/category_selector_frame'
 require_relative '../../utils/credential_frame'
 require_relative '../../utils/directory_selector_frame'
 require_relative '../../utils/info_frames'
-require_relative '../../utils/publish_directory_frame'
+require_relative '../../utils/directory_publisher'
 
 module Discourse
   module Commands
@@ -14,9 +14,10 @@ module Discourse
         Discourse::Utils::InfoFrames.info(discourse_site, api_key)
         root_directory, use_subdirectories = Discourse::Utils::DirectorySelectorFrame
                                              .select(discourse_site)
-        directories = Discourse::Utils::CategorySelectorFrame.select(root_directory, use_subdirectories,
+        directories = Discourse::Utils::CategorySelectorFrame.select(root_directory,
+                                                                     use_subdirectories,
                                                                      discourse_site)
-        Discourse::Utils::PublishDirectoryFrame.publish_directories(root_directory:, directories:)
+        Discourse::Utils::DirectoryPublisher.call(root_directory:, directories:)
       end
 
       def self.help
