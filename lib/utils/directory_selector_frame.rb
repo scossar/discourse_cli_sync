@@ -25,8 +25,7 @@ module Discourse
             confirm = CLI::UI::Prompt.confirm("Is #{directory} correct?")
             break if confirm
           end
-          # TODO: don't ask about subdirectories if there are no subdirectories
-          if confirm_subdirectories
+          if confirm_subdirectories && subdirectories?(path: directory)
             subdirectories = CLI::UI::Prompt.confirm("Also select subdirectories of #{directory}?")
           end
         end
@@ -46,6 +45,12 @@ module Discourse
 
       def self.short_paths(paths)
         paths.map { |path| Discourse::Utils::Ui.fancy_path(path) }
+      end
+
+      def self.subdirectories?(path:)
+        expanded_dir = File.expand_path(path)
+        subdirs = Dir.glob(File.join(expanded_dir, '**', '*/'))
+        subdirs.any?
       end
     end
   end
