@@ -23,8 +23,28 @@ module Discourse
         directories
       end
 
-      # TODO: check to see if a category has already been configured for the directory
       def self.category_for_directory(directory, category_names, discourse_site)
+        configured_category = directory.discourse_category
+        if configured_category
+          handle_configured_category(directory, configured_category)
+        else
+          configured_category(directory, category_names, discourse_site)
+        end
+      end
+
+      def self.handle_configured_category(directory, category)
+        short_path = Discourse::Utils::Ui.fancy_path(directory.path)
+        reconfigure = CLI::UI::Prompt.confirm("#{short_path} has been configured to publish notes to #{category.name} " \
+                                              'Would you like to reconfigure it?')
+        return unless reconfigure
+
+        confirm = CLI::UI::Prompt.confirm("Confirm that you want to change the category for #{short_path}")
+        return unless confirm
+
+        puts 'Hmmm'
+      end
+
+      def self.configure_category(directory, category_names, discourse_site)
         category_name = nil
         short_path = Discourse::Utils::Ui.fancy_path(directory.path)
         loop do
@@ -44,7 +64,7 @@ module Discourse
 
       def self.category_frame_title(path, count)
         fancy_path = Discourse::Utils::Ui.fancy_path(path)
-        count == 1 ? "Select category for #{fancy_path}" : "Select categories for #{fancy_path}"
+        count == 1 ? "Configure category for #{fancy_path}" : "Configure categories for #{fancy_path}"
       end
 
       def self.discourse_category_names
