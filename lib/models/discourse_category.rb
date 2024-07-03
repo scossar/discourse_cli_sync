@@ -11,8 +11,13 @@ module Discourse
     validates :read_restricted, inclusion: { in: [true, false] }
     validates :discourse_site, presence: true
 
-    def self.create_or_update(name:, slug:, read_restricted:, description:, discourse_id:,
-                              discourse_site:)
+    def self.create_or_update(params)
+      name = params[:name]
+      slug = params[:slug]
+      read_restricted = params[:read_restricted]
+      description = params[:description]
+      discourse_id = params[:discourse_id]
+      discourse_site = params[:discourse_site]
       category = DiscourseCategory.find_by(name:, discourse_site:)
       if category
         category.update(name:, slug:, read_restricted:, description:, discourse_id:,
