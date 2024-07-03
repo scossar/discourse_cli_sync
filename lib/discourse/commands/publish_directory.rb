@@ -14,9 +14,9 @@ module Discourse
         Discourse::Utils::InfoFrames.info(discourse_site, api_key)
         root_directory, use_subdirectories = Discourse::Utils::DirectorySelectorFrame
                                              .select(discourse_site)
-        directories = Discourse::Utils::CategorySelectorFrame.select(root_directory,
-                                                                     use_subdirectories,
-                                                                     discourse_site)
+        directories = Discourse::Utils::CategorySelectorFrame.call(root_directory,
+                                                                   use_subdirectories,
+                                                                   discourse_site)
         Discourse::Utils::DirectoryPublisher.call(root_directory:, directories:, api_key:,
                                                   discourse_site:)
       end
