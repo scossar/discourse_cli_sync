@@ -15,7 +15,7 @@ module Discourse
         private
 
         def recategorize_notes
-          notes = Discourse::Note.where(directory: @directory, discourse_site: @discourse_site)
+          notes = Discourse::Note.where(directory: @directory)
           CLI::UI::Frame.open('Recategorize notes') do
             puts notes
           end

@@ -40,8 +40,7 @@ module Discourse
           domain, base_url = configure_base_url
           discourse_username = configure_username(domain)
           vault_directory = configure_vault_directory(domain)
-          Discourse::DiscourseSite.create(domain:, base_url:, discourse_username:,
-                                          vault_directory:)
+          Discourse::DiscourseSite.create(domain:, base_url:, discourse_username:, vault_directory:)
         end
 
         def confirm_site(domain)
@@ -61,7 +60,8 @@ module Discourse
           site = Discourse::DiscourseSite.find_by(domain:)
           update_username = CLI::UI::Prompt.confirm("Update username: #{discourse_username}?")
           discourse_username = configure_username(domain) if update_username
-          update_vault_directory = CLI::UI::Prompt.confirm("Update vault directory: #{vault_directory}?")
+          update_vault_directory = CLI::UI::Prompt
+                                   .confirm("Update vault directory: #{vault_directory}?")
           vault_directory = configure_vault_directory(domain) if update_vault_directory
           if update_username || update_vault_directory
             site.update(discourse_username:, vault_directory:)
@@ -79,7 +79,6 @@ module Discourse
 
             puts CLI::UI.fmt(error_message)
           end
-
           [domain, base_url]
         end
 

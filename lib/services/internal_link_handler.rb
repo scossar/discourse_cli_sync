@@ -21,7 +21,7 @@ module Discourse
         link_adjusted = @markdown.gsub(@internal_link_regex) do |link_match|
           title = link_match.match(@internal_link_regex)[1]
           internal_links << title
-          topic_url = Note.find_by(title:, discourse_site: @discourse_site)&.topic_url
+          topic_url = Note.find_by(title:, directory: @directory)&.topic_url
           topic_url ||= placeholder_topic(title)
           new_link = "[#{title}](#{topic_url})"
           new_link
@@ -57,7 +57,7 @@ module Discourse
         topic_id = post_data['topic_id']
         post_id = post_data['id']
         Note.create(title:, topic_url:, topic_id:, post_id:,
-                    discourse_category: @category, discourse_site: @discourse_site).tap do |note|
+                    directory: @directory).tap do |note|
           raise Discourse::Errors::BaseError, 'Note could not be created' unless note.persisted?
         end
       rescue StandardError => e

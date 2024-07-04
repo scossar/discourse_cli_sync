@@ -18,8 +18,8 @@ module Discourse
                                                                    use_subdirectories:,
                                                                    api_key:,
                                                                    discourse_site:)
-        # Discourse::Utils::DirectoryPublisher.call(root_directory:, directories:, api_key:,
-        # discourse_site:)
+        Discourse::Utils::DirectoryPublisher.call(root_directory:, directories:, api_key:,
+                                                  discourse_site:)
       end
 
       def self.help

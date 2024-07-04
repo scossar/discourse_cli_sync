@@ -34,6 +34,7 @@ module Discourse
           end
         end
 
+        # TODO: not being used
         def notes_for_directory(directory)
           paths = Dir.glob(File.join(directory.path, '*.md'))
           titles = paths.map { |path| File.basename(path) }
