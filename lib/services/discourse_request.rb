@@ -12,8 +12,8 @@ module Discourse
       @faraday_client = FaradayClient.new(site, api_key)
     end
 
-    def create_topic(title:, markdown:, category:)
-      params = { title:, raw: markdown, category:, skip_validations: true }
+    def create_topic(title:, markdown:, category:, tags: [])
+      params = { title:, raw: markdown, category:, tags:, skip_validations: true }
       @faraday_client.post('/posts.json', params)
     end
 

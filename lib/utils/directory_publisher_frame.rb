@@ -5,7 +5,7 @@ require_relative 'ui_utils'
 
 module Discourse
   module Utils
-    class DirectoryPublisher
+    class DirectoryPublisherFrame
       class << self
         def call(root_directory:, directories:, api_key:, discourse_site:)
           @directories = directories

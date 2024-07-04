@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_03_230708) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_04_201648) do
   create_table "directories", force: :cascade do |t|
     t.string "path", null: false
     t.integer "discourse_category_id"
@@ -45,6 +45,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_03_230708) do
     t.string "base_url", null: false
     t.string "vault_directory"
     t.string "discourse_username"
+    t.string "site_tag"
     t.index ["domain", "discourse_username"], name: "index_discourse_sites_on_domain_and_discourse_username", unique: true
   end
 
