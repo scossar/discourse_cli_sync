@@ -66,7 +66,8 @@ module Discourse
           published_notes = Discourse::Note.all
           return unless published_notes.any?
 
-          update_topics = CLI::UI::Prompt.confirm("Add #{@discourse_site.site_tag} to existing topics?")
+          update_topics = CLI::UI::Prompt
+                          .confirm("Add #{@discourse_site.site_tag} to existing topics?")
 
           return unless update_topics
 
