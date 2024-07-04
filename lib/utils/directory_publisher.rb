@@ -24,7 +24,7 @@ module Discourse
         end
 
         def publish_directory(directory)
-          paths, _titles, _titles_path_hash = notes_for_directory(directory)
+          paths = notes_for_directory(directory)
 
           paths.each do |note_path|
             Discourse::Utils::NotePublisher.call(note_path:,
@@ -34,20 +34,8 @@ module Discourse
           end
         end
 
-        # TODO: not being used
         def notes_for_directory(directory)
-          paths = Dir.glob(File.join(directory.path, '*.md'))
-          titles = paths.map { |path| File.basename(path) }
-          titles_path_hash = titles_path_hash(titles, paths)
-          [paths, titles, titles_path_hash]
-        end
-
-        def titles_path_hash(titles, paths)
-          titles.zip(paths).to_h
-        end
-
-        def path_from_title(title_path_mapping, title)
-          title_path_mapping[title]
+          Dir.glob(File.join(directory.path, '*.md'))
         end
 
         def short_path(directory)

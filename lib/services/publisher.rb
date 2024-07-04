@@ -68,6 +68,10 @@ module Discourse
         "#{@base_url}/t/#{post_data['topic_slug']}/#{post_data['topic_id']}"
       end
 
+      # TODO: For stub topics, it's possible that markdown will be empty here.
+      # That will trigger a 422 error. Maybe check and add some default text?
+      # Also, probably add a discourse_category_id field to Notes.
+      # If it's out of sync the the Note's Directory do something
       def update_topic(note, markdown)
         @client.update_post(markdown:, post_id: note.post_id).tap do |response|
           unless response
