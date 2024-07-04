@@ -6,12 +6,15 @@ module Discourse
       class << self
         def call(discourse_site:)
           @discourse_site = discourse_site
+          @tag_regex = /^[\w-]{3,20}$/
           tag_frame
         end
 
+        private
+
         def tag_frame
           site_tag = @discourse_site&.site_tag
-          CLI::UI::Frame.open("Tag for #{@discourse_site.domain} notes") do
+          CLI::UI::Frame.open("Tag for notes published from #{@discourse_site.domain}") do
             if site_tag
               confirm_site_tag(site_tag)
             else
@@ -23,18 +26,46 @@ module Discourse
         def confirm_site_tag(site_tag)
           change_site_tag = CLI::UI::Prompt
                             .confirm("Notes published to #{@discourse_site.domain} will be  " \
-                                     "tagged with #{site_tag}. Would you like to change this?")
+                                     "tagged with '#{site_tag}'. Would you like to change this?")
           return unless change_site_tag
 
           confirm = CLI::UI::Prompt
-                    .confirm("Confirm that you want to change or remove the #{@discourse_site.domain} tag")
+                    .confirm('Confirm that you want to change or remove the tag used for ' \
+                             "#{@discourse_site.domain}.")
           return unless confirm
 
           set_site_tag
+
+          update_topic_tags
         end
 
         def set_site_tag
-          puts 'this is a test, this is only a test'
+          tag = nil
+          loop do
+            tag = CLI::UI::Prompt
+                  .ask("Tag for notes published from #{@discourse_site.domain}. " \
+                       '(Leave empty to publish notes without tags.)')
+            valid_tag = @tag_regex.match(tag) || tag.empty?
+            unless valid_tag
+              tag = CLI::UI::Prompt
+                    .ask("'#{tag}' is not valid. Please try again")
+            end
+
+            confirm = CLI::UI::Prompt.confirm(tag_confirm_prompt(tag))
+            break if confirm
+          end
+          site_tag = tag.empty? ? nil : tag
+          @discourse_site.update(site_tag:)
+        end
+
+        def update_topic_tags; end
+
+        def tag_confirm_prompt(tag)
+          if tag.empty?
+            "Confirm that no tag should be added to notes published from #{@discourse_site.domain}"
+          else
+            "Is '#{tag}' correct?"
+          end
         end
       end
     end
