@@ -4,7 +4,7 @@ require_relative '../models/discourse_site'
 
 module Discourse
   module Utils
-    class ConfigureHost
+    class ConfigureSite
       class << self
         def call
           configure_discourse_site
