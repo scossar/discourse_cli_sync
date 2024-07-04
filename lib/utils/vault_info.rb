@@ -12,6 +12,8 @@ module Discourse
           directory_info
         end
 
+        private
+
         def directory_info
           directories = all_directories
           directories.each do |path|

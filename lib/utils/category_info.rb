@@ -31,6 +31,8 @@ module Discourse
           [categories, category_names]
         end
 
+        private
+
         def category_info(categories)
           categories.each_value do |category|
             CLI::UI::Frame.open(category[:name]) do

@@ -6,51 +6,53 @@ require_relative 'logger'
 
 module Discourse
   module Utils
-    module DirectorySelectorFrame
-      def self.select(site, confirm_subdirectories: true)
-        select_directory(site, confirm_subdirectories)
-      end
-
-      def self.select_directory(site, confirm_subdirectories)
-        directories = Discourse::Directory.where(discourse_site: site)
-        paths = directories.pluck(:path)
-        short_paths = short_paths(paths)
-        path_mapping = short_paths_hash(short_paths, paths)
-
-        subdirectories = false
-        directory = nil
-        CLI::UI::Frame.open("Select directory for #{site.domain}") do
-          loop do
-            directory = CLI::UI::Prompt.ask('Select directory', options: short_paths)
-            confirm = CLI::UI::Prompt.confirm("Is #{directory} correct?")
-            break if confirm
-          end
-          if confirm_subdirectories && subdirectories?(path: directory)
-            subdirectories = CLI::UI::Prompt.confirm("Also select subdirectories of #{directory}?")
-          end
+    class DirectorySelectorFrame
+      class << self
+        def call(site, confirm_subdirectories: true)
+          select_directory(site, confirm_subdirectories)
         end
-        selected_directory = directory_from_short_path(directories:, path_mapping:,
-                                                       short_path: directory)
-        [selected_directory, subdirectories]
-      end
 
-      def self.directory_from_short_path(directories:, path_mapping:, short_path:)
-        actual_path = path_mapping[short_path]
-        directories.find { |dir| dir.path == actual_path }
-      end
+        def select_directory(site, confirm_subdirectories)
+          directories = Discourse::Directory.where(discourse_site: site)
+          paths = directories.pluck(:path)
+          short_paths = short_paths(paths)
+          path_mapping = short_paths_hash(short_paths, paths)
 
-      def self.short_paths_hash(short_paths, paths)
-        short_paths.zip(paths).to_h
-      end
+          subdirectories = false
+          directory = nil
+          CLI::UI::Frame.open("Select directory for #{site.domain}") do
+            loop do
+              directory = CLI::UI::Prompt.ask('Select directory', options: short_paths)
+              confirm = CLI::UI::Prompt.confirm("Is #{directory} correct?")
+              break if confirm
+            end
+            if confirm_subdirectories && subdirectories?(path: directory)
+              subdirectories = CLI::UI::Prompt.confirm("Also select subdirectories of #{directory}?")
+            end
+          end
+          selected_directory = directory_from_short_path(directories:, path_mapping:,
+                                                         short_path: directory)
+          [selected_directory, subdirectories]
+        end
 
-      def self.short_paths(paths)
-        paths.map { |path| Discourse::Utils::Ui.fancy_path(path) }
-      end
+        def directory_from_short_path(directories:, path_mapping:, short_path:)
+          actual_path = path_mapping[short_path]
+          directories.find { |dir| dir.path == actual_path }
+        end
 
-      def self.subdirectories?(path:)
-        expanded_dir = File.expand_path(path)
-        subdirs = Dir.glob(File.join(expanded_dir, '**', '*/'))
-        subdirs.any?
+        def short_paths_hash(short_paths, paths)
+          short_paths.zip(paths).to_h
+        end
+
+        def short_paths(paths)
+          paths.map { |path| Discourse::Utils::Ui.fancy_path(path) }
+        end
+
+        def subdirectories?(path:)
+          expanded_dir = File.expand_path(path)
+          subdirs = Dir.glob(File.join(expanded_dir, '**', '*/'))
+          subdirs.any?
+        end
       end
     end
   end
