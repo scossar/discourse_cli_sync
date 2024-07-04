@@ -13,7 +13,7 @@ module Discourse
       def call(_args, _name)
         discourse_site, api_key = Discourse::Utils::CredentialFrame.call
         Discourse::Utils::InfoFrames.call(discourse_site:, api_key:)
-        Discourse::Utils::SiteTagFrame.call(discourse_site:)
+        Discourse::Utils::SiteTagFrame.call(discourse_site:, api_key:)
         root_directory, use_subdirectories = Discourse::Utils::DirectorySelectorFrame
                                              .call(discourse_site:)
         directories = Discourse::Utils::CategorySelectorFrame.call(directory: root_directory,

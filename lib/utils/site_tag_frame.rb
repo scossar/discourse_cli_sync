@@ -1,11 +1,15 @@
 # frozen_string_literal: true
 
+require_relative '../models/note'
+require_relative 'update_tags_frame'
+
 module Discourse
   module Utils
     class SiteTagFrame
       class << self
-        def call(discourse_site:)
+        def call(discourse_site:, api_key:)
           @discourse_site = discourse_site
+          @api_key = api_key
           @tag_regex = /^[\w-]{3,20}$/
           tag_frame
         end
@@ -58,7 +62,16 @@ module Discourse
           @discourse_site.update(site_tag:)
         end
 
-        def update_topic_tags; end
+        def update_topic_tags
+          published_notes = Discourse::Note.all
+          return unless published_notes.any?
+
+          update_topics = CLI::UI::Prompt.confirm("Add #{@discourse_site.site_tag} to existing topics?")
+
+          return unless update_topics
+
+          Discourse::Utils::UpdateTagsFrame.call(discourse_site: @discourse_site, api_key: @api_key)
+        end
 
         def tag_confirm_prompt(tag)
           if tag.empty?
