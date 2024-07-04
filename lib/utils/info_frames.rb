@@ -24,7 +24,7 @@ module Discourse
 
         def vault_info_frame
           CLI::UI::Frame.open('Vault info') do
-            Discourse::Utils::VaultInfo.directory_loader(@discourse_site)
+            Discourse::Utils::VaultInfo.call(@discourse_site)
           end
         end
       end
