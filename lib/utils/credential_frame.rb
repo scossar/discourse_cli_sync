@@ -8,7 +8,7 @@ require_relative 'configure_host'
 module Discourse
   module Utils
     module CredentialFrame
-      def self.credentials_for_site
+      def self.call
         CLI::UI::Frame.open('Discourse credentials') do
           discourse_site = Discourse::Utils::ConfigureHost.call
           password = Discourse::Utils::ApiCredentials.call(discourse_site)
