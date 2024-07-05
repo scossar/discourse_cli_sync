@@ -32,9 +32,17 @@ module Discourse
         end
 
         def confirm_publishing(title:, markdown:)
-          excerpt = markdown.split[0, 20].join(' ')
-          CLI::UI::Prompt.confirm("Publish #{title}?\n" \
-                                  "excerpt:\n{{green:#{excerpt}}")
+          publish = CLI::UI::Prompt.ask("Publish #{title}?",
+                                        options: ['yes', 'no', 'show excerpt'])
+
+          if publish == 'show excerpt'
+            excerpt = markdown.split[0, 50].join(' ')
+            CLI::UI::Frame.open(title) do
+              puts CLI::UI.fmt "{{green:#{excerpt}...}}"
+            end
+            return CLI::UI::Prompt.confirm("Publish #{title}?")
+          end
+          publish == 'yes'
         end
 
         def attachments_task(spin_group:, title:, markdown:)
