@@ -4,6 +4,7 @@ require_relative '../errors/errors'
 require_relative 'ui_utils'
 require_relative '../services/publisher'
 require_relative '../models/note'
+require_relative 'logger'
 
 module Discourse
   module Utils
@@ -12,8 +13,9 @@ module Discourse
         def call(note_path:, directory:, api_key:, discourse_site:, require_confirmation: false)
           @publisher = Discourse::Services::Publisher.new(note_path:, directory:, api_key:,
                                                           discourse_site:)
-          @directory = directory
           title, _front_matter, markdown = @publisher.parse_file
+          @directory = directory
+          @note = Discourse::Note.find_by(title:, directory: @directory)
           publishing_frame(title:, markdown:, require_confirmation:)
         end
 
@@ -28,6 +30,8 @@ module Discourse
           publish = require_confirmation ? confirm_publishing(title:, markdown:) : true
           return unless publish
 
+          return if local_only?
+
           markdown = attachments_task(spin_group:, title:, markdown:)
           markdown = internal_links_task(spin_group:, title:, markdown:)
           publish_task(spin_group:, title:, markdown:)
@@ -36,7 +40,7 @@ module Discourse
         def confirm_publishing(title:, markdown:)
           publishing_option = CLI::UI::Prompt.ask("Publish #{title}?",
                                                   options: ['yes', 'no', 'show excerpt',
-                                                            'mark as private'])
+                                                            'mark as local only'])
 
           if publishing_option == 'show excerpt'
             excerpt = markdown.split[0, 50].join(' ')
@@ -44,21 +48,20 @@ module Discourse
               puts CLI::UI.fmt "{{green:#{excerpt}...}}"
             end
             publishing_option = CLI::UI::Prompt.ask("Publish #{title}?",
-                                                    options: ['yes', 'no', 'mark as private'])
+                                                    options: ['yes', 'no', 'mark as local only'])
           end
-          if publishing_option == 'mark as private'
-            mark_note_as_private(title)
+          if publishing_option == 'mark as local only'
+            mark_note_as_local_only(title)
             return
-          end
 
+          end
           publishing_option == 'yes'
         end
 
-        def mark_note_as_private(title)
-          note = Discourse::Note.find_by(title:, directory: @directory)
-          if note
-            note.update(local_only: true).tap do |note|
-              raise Discourse::Errors::BaseError, 'Note could be updated' unless note.persisted?
+        def mark_note_as_local_only(title)
+          if @note
+            @note.update(local_only: true).tap do |note|
+              raise Discourse::Errors::BaseError, 'Note could be updated' unless note
             end
           else
             Discourse::Note.create(title:, directory: @directory, local_only: true).tap do |note|
@@ -67,6 +70,10 @@ module Discourse
           end
         rescue StandardError => e
           raise Discourse::Errors::BaseError, "Error creating or updating Note record: #{e.message}"
+        end
+
+        def local_only?
+          @note&.local_only
         end
 
         def attachments_task(spin_group:, title:, markdown:)
@@ -90,9 +97,8 @@ module Discourse
         end
 
         def publish_task(spin_group:, title:, markdown:)
-          note = Discourse::Note.find_by(title:, directory: @directory)
-          if note
-            update_topic(spin_group:, title:, markdown:, note:)
+          if @note
+            update_topic(spin_group:, title:, markdown:, note: @note)
           else
             create_topic(spin_group:, title:, markdown:)
           end
