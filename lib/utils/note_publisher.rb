@@ -47,6 +47,9 @@ module Discourse
         end
 
         def publish(spin_group)
+          skip = local_only_task(spin_group)
+          return if skip
+
           attachments_task(spin_group)
           internal_links_task(spin_group)
           publish_task(spin_group)
@@ -58,15 +61,15 @@ module Discourse
                                 .confirm("#{@title} is set to local only. Keep that status?")
             return :local_only if keep_local_status
 
-            return local_only_task(spin_group, false)
+            return local_only_spinner(spin_group, false)
           else
             local_only = CLI::UI::Prompt.confirm("Set #{@title} to local only?")
-            return local_only_task(spin_group, true) if local_only
+            return local_only_spinner(spin_group, true) if local_only
           end
           :not_local
         end
 
-        def local_only_task(spin_group, local_only)
+        def local_only_spinner(spin_group, local_only)
           spinner_title = if local_only
                             "Configuring #{@title} to be a local only note"
                           else
@@ -110,6 +113,17 @@ module Discourse
             spin_group.wait
           end
           publish_status == 'publish' ? :publish : :skip
+        end
+
+        def local_only_task(spin_group)
+          local_only = @note&.local_only
+          return false unless local_only
+
+          spin_group.add("Skipping publishing local only note #{@title}") do
+            sleep 0.25
+          end
+          spin_group.wait
+          true
         end
 
         def attachments_task(spin_group)
