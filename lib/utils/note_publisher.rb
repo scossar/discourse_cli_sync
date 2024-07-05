@@ -35,6 +35,9 @@ module Discourse
         end
 
         def publish_with_confirmation(spin_group)
+          publish_status = confirm_local_status(spin_group)
+          return unless publish_status == :publish
+
           attachments_task(spin_group)
           internal_links_task(spin_group)
           publish_task(spin_group)
@@ -46,61 +49,43 @@ module Discourse
           publish_task(spin_group)
         end
 
-        def confirm_publish_method(title:, markdown:)
-          keep_local = confirm_local_only_state
-          return :local_only if keep_local == :local_only
+        def confirm_local_status(spin_group)
+          if @note&.local_only
+            keep_local_status = CLI::UI::Prompt.confirm("#{@title} is set to local only. Keep that status?")
+            return :local_only if keep_local_status
 
-          options = ['yes', 'no', 'show excerpt']
-          options << 'mark as local only' unless keep_local == :publish
-          publishing_option = CLI::UI::Prompt.ask("Publish #{title}?",
-                                                  options: ['yes', 'no', 'show excerpt',
-                                                            'mark as local only'])
-
-          if publishing_option == 'show excerpt'
-            excerpt = markdown.split[0, 50].join(' ')
-            CLI::UI::Frame.open(title) do
-              puts CLI::UI.fmt "{{green:#{excerpt}...}}"
+            spin_group.add("Configuring #{@title} to be published to Discourse") do
+              configure_local_status(false)
+              sleep 0.25
             end
-            publishing_option = CLI::UI::Prompt.ask("Publish #{title}?",
-                                                    options: ['yes', 'no', 'mark as local only'])
+            spin_group.wait
+            :publish
+          else
+            publish = CLI::UI::Prompt.confirm("Allow #{@title} to be published to Discourse?")
+            unless publish
+              spin_group.add("Configuring #{@title} to be a local only note") do
+                configure_local_status(true)
+                sleep 0.25
+              end
+              spin_group.wait
+              return :local_only
+            end
           end
-          if publishing_option == 'mark as local only'
-            set_local_only_state(title:, local_only: true)
-            return :local_only
-
-          end
-          publishing_option == 'yes' ? :publish : :skip
-        end
-
-        def confirm_local_only_state
-          local_only = @note&.local_only
-
-          return unless local_only
-
-          keep_local = CLI::UI::Prompt
-                       .confirm("#{@note.title} is set to 'local only'. Would you like to keep that configuration?")
-          return :local_only if keep_local
-
-          set_local_only_state(title: @note.title, local_only: false)
           :publish
         end
 
-        def set_local_only_state(title:, local_only:)
+        def configure_local_status(local_only)
           if @note
             unless @note.update(local_only:)
               raise Discourse::Errors::BaseError, 'Note could not be updated'
             end
           else
-            note = Discourse::Note.create(title:, directory: @directory, local_only:)
+            note = Discourse::Note.create(title: @title, directory: @directory, local_only:)
             raise Discourse::Errors::BaseError, 'Note could not be created' unless note.persisted?
           end
         rescue StandardError => e
           raise Discourse::Errors::BaseError,
                 "Error creating or updating Note record: #{e.message}"
-        end
-
-        def local_only?
-          @note&.local_only
         end
 
         def publish_method_task(spin_group:, title:, publish_method:)
