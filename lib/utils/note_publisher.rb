@@ -51,27 +51,31 @@ module Discourse
 
         def confirm_local_status(spin_group)
           if @note&.local_only
-            keep_local_status = CLI::UI::Prompt.confirm("#{@title} is set to local only. Keep that status?")
+            keep_local_status = CLI::UI::Prompt
+                                .confirm("#{@title} is set to local only. Keep that status?")
             return :local_only if keep_local_status
 
-            spin_group.add("Configuring #{@title} to be published to Discourse") do
-              configure_local_status(false)
-              sleep 0.25
-            end
-            spin_group.wait
-            :publish
+            return local_only_task(spin_group, false)
           else
             publish = CLI::UI::Prompt.confirm("Allow #{@title} to be published to Discourse?")
-            unless publish
-              spin_group.add("Configuring #{@title} to be a local only note") do
-                configure_local_status(true)
-                sleep 0.25
-              end
-              spin_group.wait
-              return :local_only
-            end
+            return local_only_task(spin_group, true) unless publish
           end
           :publish
+        end
+
+        def local_only_task(spin_group, local_only)
+          spinner_title = if local_only
+                            "Configuring #{@title} to be a local only note"
+                          else
+                            "Configuring #{@title} to be published to Discourse"
+                          end
+
+          spin_group.add(spinner_title) do
+            configure_local_status(local_only)
+            sleep 0.25
+          end
+          spin_group.wait
+          local_only ? :local_only : :publish
         end
 
         def configure_local_status(local_only)
