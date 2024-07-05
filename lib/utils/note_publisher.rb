@@ -35,7 +35,10 @@ module Discourse
         end
 
         def publish_with_confirmation(spin_group)
-          publish_status = confirm_local_status(spin_group)
+          local_status = confirm_local_status(spin_group)
+          return unless local_status == :not_local
+
+          publish_status = confirm_publish_status(spin_group)
           return unless publish_status == :publish
 
           attachments_task(spin_group)
@@ -57,10 +60,10 @@ module Discourse
 
             return local_only_task(spin_group, false)
           else
-            publish = CLI::UI::Prompt.confirm("Allow #{@title} to be published to Discourse?")
-            return local_only_task(spin_group, true) unless publish
+            local_only = CLI::UI::Prompt.confirm("Set #{@title} to local only?")
+            return local_only_task(spin_group, true) if local_only
           end
-          :publish
+          :not_local
         end
 
         def local_only_task(spin_group, local_only)
@@ -75,7 +78,7 @@ module Discourse
             sleep 0.25
           end
           spin_group.wait
-          local_only ? :local_only : :publish
+          local_only ? :local_only : :not_local
         end
 
         def configure_local_status(local_only)
@@ -92,16 +95,21 @@ module Discourse
                 "Error creating or updating Note record: #{e.message}"
         end
 
-        def publish_method_task(spin_group:, title:, publish_method:)
-          spin_group_title = if publish_method == :skip
-                               "Skipping #{title}"
-                             else
-                               "Skipping local only note #{title}"
-                             end
-          spin_group.add(spin_group_title) do
-            sleep 0.25
+        def confirm_publish_status(spin_group)
+          publish_status = CLI::UI::Prompt.ask("Publish #{@title}?",
+                                               options: ['publish', 'skip', 'show excerpt'])
+          if publish_status == 'show excerpt'
+            excerpt = @markdown.split[0, 50].join(' ')
+            puts CLI::UI.fmt "Note excerpt:\n#{excerpt}..."
+            publish_status = CLI::UI::Prompt.ask("Publish #{@title}?", options: %w[publish skip])
           end
-          spin_group.wait
+          unless publish_status == 'publish'
+            spin_group.add("Skipping publishing for #{@title}") do
+              sleep 0.25
+            end
+            spin_group.wait
+          end
+          publish_status == 'publish' ? :publish : :skip
         end
 
         def attachments_task(spin_group)
