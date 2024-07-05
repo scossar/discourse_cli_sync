@@ -21,6 +21,13 @@ module Discourse
       nil
     end
 
+    def category_by_id(category_id)
+      @categories.each do |id, category|
+        return category if id == category_id
+      end
+      nil
+    end
+
     private
 
     def fetch_categories(site, api_key)

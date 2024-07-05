@@ -10,7 +10,7 @@ module Discourse
         def call(discourse_site:, api_key:)
           @discourse_site = discourse_site
           @api_key = api_key
-          fetcher = DiscourseCategoryFetcher.new(@discourse_site, @api_key)
+          @fetcher = DiscourseCategoryFetcher.new(@discourse_site, @api_key)
 
           spin_group = CLI::UI::SpinGroup.new
 
@@ -18,20 +18,32 @@ module Discourse
             puts CLI::UI.fmt "  #{exception}"
           end
 
-          categories, category_names = nil
+          discourse_categories, discourse_category_names = nil
           spin_group.add('Categories') do |spinner|
-            categories = fetcher.categories
-            category_names = fetcher.category_names
+            discourse_categories = @fetcher.categories
+            discourse_category_names = @fetcher.category_names
             spinner.update_title('Categories loaded')
           end
 
           spin_group.wait
 
-          category_info(categories)
-          [categories, category_names]
+          check_for_missing(discourse_categories)
+          category_info(discourse_categories)
+          [discourse_categories, discourse_category_names]
         end
 
         private
+
+        def check_for_missing(_discourse_categories)
+          local_categories = Discourse::DiscourseCategory.where(discourse_site: @discourse_site)
+          local_categories.each do |local|
+            CLI::UI::Frame.open("Checking #{local.name}") do
+              unless @fetcher.category_by_id(local.discourse_id)
+                puts "missing discourse category for #{local.name}"
+              end
+            end
+          end
+        end
 
         def category_info(categories)
           categories.each_value do |category|
