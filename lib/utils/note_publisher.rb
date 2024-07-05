@@ -8,25 +8,33 @@ module Discourse
   module Utils
     class NotePublisher
       class << self
-        def call(note_path:, directory:, api_key:, discourse_site:)
+        def call(note_path:, directory:, api_key:, discourse_site:, require_confirmation: false)
           @publisher = Discourse::Services::Publisher.new(note_path:, directory:, api_key:,
                                                           discourse_site:)
           title, _front_matter, markdown = @publisher.parse_file
-          publishing_frame(title, markdown)
+          publishing_frame(title:, markdown:, require_confirmation:)
         end
 
         private
 
-        def publishing_frame(title, markdown)
+        def publishing_frame(title:, markdown:, require_confirmation:)
           spin_group = CLI::UI::SpinGroup.new
 
           spin_group.failure_debrief do |_title, exception|
             puts CLI::UI.fmt "  #{exception}"
           end
+          publish = require_confirmation ? confirm_publishing(title:, markdown:) : true
+          return unless publish
 
           markdown = attachments_task(spin_group:, title:, markdown:)
           markdown = internal_links_task(spin_group:, title:, markdown:)
           publish_task(spin_group:, title:, markdown:)
+        end
+
+        def confirm_publishing(title:, markdown:)
+          excerpt = markdown.split[0, 20].join(' ')
+          CLI::UI::Prompt.confirm("Publish #{title}?\n" \
+                                  "excerpt:\n{{green:#{excerpt}}")
         end
 
         def attachments_task(spin_group:, title:, markdown:)
