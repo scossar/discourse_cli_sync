@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_04_201648) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_05_084412) do
   create_table "directories", force: :cascade do |t|
     t.string "path", null: false
     t.integer "discourse_category_id"
@@ -31,10 +31,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_04_201648) do
     t.text "description"
     t.integer "discourse_id"
     t.integer "discourse_site_id"
-    t.index ["discourse_id"], name: "index_discourse_categories_on_discourse_id", unique: true
+    t.index ["discourse_site_id", "discourse_id"], name: "index_discourse_categories_on_site_and_discourse_id", unique: true
+    t.index ["discourse_site_id", "name"], name: "index_discourse_categories_on_site_and_name", unique: true
+    t.index ["discourse_site_id", "slug"], name: "index_discourse_categories_on_site_and_slug", unique: true
     t.index ["discourse_site_id"], name: "index_discourse_categories_on_discourse_site_id"
-    t.index ["name"], name: "index_discourse_categories_on_name", unique: true
-    t.index ["slug"], name: "index_discourse_categories_on_slug", unique: true
   end
 
   create_table "discourse_sites", force: :cascade do |t|

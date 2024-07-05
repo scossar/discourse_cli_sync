@@ -17,13 +17,13 @@ module Discourse
         private
 
         def site_info_frame
-          CLI::UI::Frame.open('Discourse info') do
+          CLI::UI::Frame.open('Pulling in Discourse site data') do
             Discourse::Utils::CategoryInfo.call(discourse_site: @discourse_site, api_key: @api_key)
           end
         end
 
         def vault_info_frame
-          CLI::UI::Frame.open('Vault info') do
+          CLI::UI::Frame.open('Syncing with local vault directories') do
             Discourse::Utils::VaultInfo.call(@discourse_site)
           end
         end

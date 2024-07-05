@@ -35,10 +35,11 @@ module Discourse
 
         def category_info(categories)
           categories.each_value do |category|
-            CLI::UI::Frame.open(category[:name]) do
+            CLI::UI::Frame.open("{{blue:#{category[:name]}}}") do
               create_or_update_category(category)
-              puts CLI::UI.fmt "read_restricted: #{category[:read_restricted]}"
-              puts CLI::UI.fmt category[:description_excerpt]
+              puts CLI::UI.fmt "  {{cyan:read_restricted}}: #{category[:read_restricted]}"
+              description = category[:description_excerpt] || 'No description available.'
+              puts CLI::UI.fmt "  {{cyan:description}}: #{description}"
             end
           end
         end
@@ -49,7 +50,7 @@ module Discourse
             puts CLI::UI.fmt "  #{exception}"
           end
 
-          spin_group.add('Updating Categories') do |spinner|
+          spin_group.add('Updating local category data') do |spinner|
             Discourse::DiscourseCategory
               .create_or_update(name: category[:name],
                                 slug: category[:slug],
@@ -57,7 +58,7 @@ module Discourse
                                 description: category[:description_excerpt],
                                 discourse_id: category[:id],
                                 discourse_site: @discourse_site)
-            spinner.update_title("Updated info for #{category[:name]}")
+            spinner.update_title("Updated database entry for {{blue:#{category[:name]}}}")
           end
 
           spin_group.wait
