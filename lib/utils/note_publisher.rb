@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require_relative '../errors/errors'
 require_relative 'ui_utils'
 require_relative '../services/publisher'
 require_relative '../models/note'
@@ -11,6 +12,7 @@ module Discourse
         def call(note_path:, directory:, api_key:, discourse_site:, require_confirmation: false)
           @publisher = Discourse::Services::Publisher.new(note_path:, directory:, api_key:,
                                                           discourse_site:)
+          @directory = directory
           title, _front_matter, markdown = @publisher.parse_file
           publishing_frame(title:, markdown:, require_confirmation:)
         end
@@ -32,17 +34,39 @@ module Discourse
         end
 
         def confirm_publishing(title:, markdown:)
-          publish = CLI::UI::Prompt.ask("Publish #{title}?",
-                                        options: ['yes', 'no', 'show excerpt'])
+          publishing_option = CLI::UI::Prompt.ask("Publish #{title}?",
+                                                  options: ['yes', 'no', 'show excerpt',
+                                                            'mark as private'])
 
-          if publish == 'show excerpt'
+          if publishing_option == 'show excerpt'
             excerpt = markdown.split[0, 50].join(' ')
             CLI::UI::Frame.open(title) do
               puts CLI::UI.fmt "{{green:#{excerpt}...}}"
             end
-            return CLI::UI::Prompt.confirm("Publish #{title}?")
+            publishing_option = CLI::UI::Prompt.ask("Publish #{title}?",
+                                                    options: ['yes', 'no', 'mark as private'])
           end
-          publish == 'yes'
+          if publishing_option == 'mark as private'
+            mark_note_as_private(title)
+            return
+          end
+
+          publishing_option == 'yes'
+        end
+
+        def mark_note_as_private(title)
+          note = Discourse::Note.find_by(title:, directory: @directory)
+          if note
+            note.update(local_only: true).tap do |note|
+              raise Discourse::Errors::BaseError, 'Note could be updated' unless note.persisted?
+            end
+          else
+            Discourse::Note.create(title:, directory: @directory, local_only: true).tap do |note|
+              raise Discourse::Errors::BaseError, 'Note could not be created' unless note.persisted?
+            end
+          end
+        rescue StandardError => e
+          raise Discourse::Errors::BaseError, "Error creating or updating Note record: #{e.message}"
         end
 
         def attachments_task(spin_group:, title:, markdown:)
@@ -66,7 +90,7 @@ module Discourse
         end
 
         def publish_task(spin_group:, title:, markdown:)
-          note = Discourse::Note.find_by(title:)
+          note = Discourse::Note.find_by(title:, directory: @directory)
           if note
             update_topic(spin_group:, title:, markdown:, note:)
           else
