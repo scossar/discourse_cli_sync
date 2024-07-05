@@ -60,16 +60,16 @@ module Discourse
 
         def mark_note_as_local_only(title)
           if @note
-            @note.update(local_only: true).tap do |note|
-              raise Discourse::Errors::BaseError, 'Note could be updated' unless note
+            unless @note.update(local_only: true)
+              raise Discourse::Errors::BaseError, 'Note could not be updated'
             end
           else
-            Discourse::Note.create(title:, directory: @directory, local_only: true).tap do |note|
-              raise Discourse::Errors::BaseError, 'Note could not be created' unless note.persisted?
-            end
+            note = Discourse::Note.create(title:, directory: @directory, local_only: true)
+            raise Discourse::Errors::BaseError, 'Note could not be created' unless note.persisted?
           end
         rescue StandardError => e
-          raise Discourse::Errors::BaseError, "Error creating or updating Note record: #{e.message}"
+          raise Discourse::Errors::BaseError,
+                "Error creating or updating Note record: #{e.message}"
         end
 
         def local_only?
