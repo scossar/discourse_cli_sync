@@ -13,37 +13,37 @@ module Discourse
         def call(note_path:, directory:, api_key:, discourse_site:, require_confirmation: false)
           @publisher = Discourse::Services::Publisher.new(note_path:, directory:, api_key:,
                                                           discourse_site:)
-          title, _front_matter, markdown = @publisher.parse_file
+          @title, _front_matter, @markdown = @publisher.parse_file
           @directory = directory
-          @note = Discourse::Note.find_by(title:, directory: @directory)
-          publishing_frame(title:, markdown:, require_confirmation:)
+          @note = Discourse::Note.find_by(title: @title, directory: @directory)
+          publishing_frame(require_confirmation)
         end
 
         private
 
-        def publishing_frame(title:, markdown:, require_confirmation:)
+        def publishing_frame(require_confirmation)
           spin_group = CLI::UI::SpinGroup.new
 
           spin_group.failure_debrief do |_title, exception|
             puts CLI::UI.fmt "  #{exception}"
           end
-          publish_method = if require_confirmation
-                             confirm_publish_method(title:,
-                                                    markdown:)
-                           else
-                             :publish
-                           end
-
-          unless publish_method == :publish
-            publish_method_task(spin_group:, title:,
-                                publish_method:)
+          if require_confirmation
+            publish_with_confirmation(spin_group)
+          else
+            publish(spin_group)
           end
+        end
 
-          return unless publish_method == :publish
+        def publish_with_confirmation(spin_group)
+          attachments_task(spin_group)
+          internal_links_task(spin_group)
+          publish_task(spin_group)
+        end
 
-          markdown = attachments_task(spin_group:, title:, markdown:)
-          markdown = internal_links_task(spin_group:, title:, markdown:)
-          publish_task(spin_group:, title:, markdown:)
+        def publish(spin_group)
+          attachments_task(spin_group)
+          internal_links_task(spin_group)
+          publish_task(spin_group)
         end
 
         def confirm_publish_method(title:, markdown:)
@@ -115,65 +115,65 @@ module Discourse
           spin_group.wait
         end
 
-        def attachments_task(spin_group:, title:, markdown:)
-          spin_group.add("Handling uploads for #{title}") do |spinner|
-            markdown, filenames = @publisher.handle_attachments(markdown)
-            spinner_title = uploads_title(filenames, title)
+        def attachments_task(spin_group)
+          spin_group.add("Handling uploads for #{@title}") do |spinner|
+            @markdown, filenames = @publisher.handle_attachments(@markdown)
+            spinner_title = uploads_title(filenames)
             spinner.update_title(spinner_title)
           end
           spin_group.wait
-          markdown
+          @markdown
         end
 
-        def internal_links_task(spin_group:, title:, markdown:)
-          spin_group.add("Handling internal links for #{title}") do |spinner|
-            markdown, stub_topics = @publisher.handle_internal_links(markdown)
-            spinner_title = links_title(stub_topics, title)
+        def internal_links_task(spin_group)
+          spin_group.add("Handling internal links for #{@title}") do |spinner|
+            @markdown, stub_topics = @publisher.handle_internal_links(@markdown)
+            spinner_title = links_title(stub_topics)
             spinner.update_title(spinner_title)
           end
           spin_group.wait
-          markdown
+          @markdown
         end
 
-        def publish_task(spin_group:, title:, markdown:)
+        def publish_task(spin_group)
           if @note
-            update_topic(spin_group:, title:, markdown:, note: @note)
+            update_topic(spin_group)
           else
-            create_topic(spin_group:, title:, markdown:)
+            create_topic(spin_group)
           end
         end
 
-        def update_topic(spin_group:, title:, markdown:, note:)
-          spin_group.add("Updating topic for #{title}") do |spinner|
-            @publisher.update_topic(note, markdown)
-            spinner.update_title("Topic updated for #{title}")
-          end
-          spin_group.wait
-        end
-
-        def create_topic(spin_group:, title:, markdown:)
-          spin_group.add("Creating new topic for #{title}") do |spinner|
-            @publisher.create_topic(title, markdown)
-            spinner.update_title("Topic created for #{title}")
+        def update_topic(spin_group)
+          spin_group.add("Updating topic for #{@title}") do |spinner|
+            @publisher.update_topic(@note, @markdown)
+            spinner.update_title("Topic updated for #{@title}")
           end
           spin_group.wait
         end
 
-        def uploads_title(filenames, title)
+        def create_topic(spin_group)
+          spin_group.add("Creating new topic for #{@title}") do |spinner|
+            @publisher.create_topic(@title, @markdown)
+            spinner.update_title("Topic created for #{@title}")
+          end
+          spin_group.wait
+        end
+
+        def uploads_title(filenames)
           if filenames.any?
             uploads_str = Discourse::Utils::Ui.colored_text_from_array(filenames, 'green')
-            "Uploaded #{uploads_str} for {{green:#{title}}}"
+            "Uploaded #{uploads_str} for {{green:#{@title}}}"
           else
-            "No uploads for {{green:#{title}}}"
+            "No uploads for {{green:#{@title}}}"
           end
         end
 
-        def links_title(stub_topics, title)
+        def links_title(stub_topics)
           if stub_topics.any?
             topics_str = Discourse::Utils::Ui.colored_text_from_array(stub_topics, 'green')
             "Generated stub topics for #{topics_str}"
           else
-            "No internal links in {{green:#{title}}}"
+            "No internal links in {{green:#{@title}}}"
           end
         end
       end
