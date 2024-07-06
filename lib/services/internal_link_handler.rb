@@ -21,22 +21,32 @@ module Discourse
         link_adjusted = @markdown.gsub(@internal_link_regex) do |link_match|
           title = link_match.match(@internal_link_regex)[1]
           internal_links << title
-          # TODO: handle the case of topic_url being nil because the note is local only
-          topic_url = Note.find_by(title:, directory: @directory)&.topic_url
-          topic_url ||= placeholder_topic(title)
+          linked_note = Note.find_by(title:, directory: @directory)
+          topic_url = linked_note&.topic_url
+          topic_url ||= if linked_note&.local_only
+                          local_only_placeholder_topic(title, linked_note)
+                        else
+                          placeholder_topic(title)
+                        end
           new_link = "[#{title}](#{topic_url})"
           new_link
         rescue StandardError => e
           raise Discourse::Errors::BaseError,
-                "Error converting interal link to relative link: #{e.message}"
+                "Error converting internal link to relative link: #{e.message}"
         end
         [link_adjusted, internal_links]
       end
 
       private
 
+      def local_only_placeholder_topic(title, linked_note)
+        markdown = "This is a placeholder topic for the local only note _#{title}_."
+        post_data = create_discourse_topic(title, markdown)
+        update_note_entry(post_data, linked_note)
+      end
+
       def placeholder_topic(title)
-        markdown = "This is a placeholder topic for #{title}"
+        markdown = "This is a placeholder topic for _#{title}_."
         post_data = create_discourse_topic(title, markdown)
         note = create_note_entry(title, post_data)
         note.topic_url
@@ -64,6 +74,20 @@ module Discourse
         end
       rescue StandardError => e
         raise Discourse::Errors::BaseError, "Error creating Note: #{e.message}"
+      end
+
+      def update_note_entry(post_data, note)
+        topic_url = url_from_post_data(post_data)
+        topic_id = post_data['topic_id']
+        post_id = post_data['id']
+        note.update(topic_url:, topic_id:, post_id:).tap do |updated_note|
+          unless updated_note
+            raise Discourse::Errors::BaseError, 'Note entry for linked note could not be updated'
+          end
+        end
+        topic_url
+      rescue StandardError => e
+        raise Discourse::Errors::BaseError, "Error updating linked Note entry: #{e.message}"
       end
 
       def url_from_post_data(post_data)
