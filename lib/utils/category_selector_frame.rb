@@ -87,7 +87,7 @@ module Discourse
         end
 
         def discourse_category_names
-          Discourse::DiscourseCategory.all.pluck(:name)
+          Discourse::DiscourseCategory.where(discourse_site: @discourse_site).pluck(:name)
         end
       end
     end
