@@ -54,7 +54,7 @@ module Discourse
 
       def create_discourse_topic(title, markdown)
         client = DiscourseRequest.new(@discourse_site, @api_key)
-        client.create_topic(title:, markdown:,
+        client.create_topic(title:, markdown:, tags: [@discourse_site.site_tag],
                             category: @directory.discourse_category.discourse_id).tap do |response|
           unless response
             raise Discourse::Errors::BaseError,
