@@ -48,15 +48,18 @@ module Discourse
         def handle_missing_category(local_category, local_categories)
           vault_directories = Discourse::Directory.where(discourse_category: local_category,
                                                          discourse_site: @discourse_site)
-          return handle_delete_category(local_category) unless vault_directories.any?
-
-          options = local_categories.pluck(:name)
-          options -= [local_category.name]
-
           spin_group = CLI::UI::SpinGroup.new
           spin_group.failure_debrief do |_title, exception|
             puts CLI::UI.fmt "  #{exception}"
           end
+
+          unless vault_directories.any?
+            return handle_delete_category(spin_group:,
+                                          category: local_category)
+          end
+
+          options = local_categories.pluck(:name)
+          options -= [local_category.name]
 
           vault_directories.each do |directory|
             selected_name = nil
@@ -74,10 +77,10 @@ module Discourse
         end
 
         def update_directory_category(spin_group:, directory:, categories:, category_name:)
+          discourse_category = categories.find do |category|
+            category.name == category_name
+          end
           spin_group.add("Updating category for #{directory.path}") do |spinner|
-            discourse_category = categories.find do |category|
-              category.name == category_name
-            end
             directory.update(discourse_category:).tap do |dir|
               raise Discourse::Errors::BaseError unless dir
             end
@@ -87,12 +90,16 @@ module Discourse
 
           Discourse::Utils::RecategorizeNotesFrame.call(directory:,
                                                         discourse_site: @discourse_site, api_key: @api_key)
+
+          handle_delete_category(spin_group:, category: discourse_category)
         end
 
-        def handle_delete_category(discourse_category)
-          CLI::UI::Frame.open('delete category') do
-            "The category #{discourse_category.name} needs to be deleted"
+        def handle_delete_category(spin_group:, category:)
+          spin_group.add("Deleting local entry for #{category.name}") do |spinner|
+            Discourse::DiscourseCategory.find(category.id).destroy
+            spinner.update_title("Deleted local entry for #{category.name}")
           end
+          spin_group.wait
         end
 
         def create_or_update_category(category)
