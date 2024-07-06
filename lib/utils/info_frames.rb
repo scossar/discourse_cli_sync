@@ -17,7 +17,7 @@ module Discourse
         private
 
         def site_info_frame
-          CLI::UI::Frame.open('Pulling in Discourse site data') do
+          CLI::UI::Frame.open('Syncing vault with Discourse categories') do
             Discourse::Utils::CategoryInfo.call(discourse_site: @discourse_site, api_key: @api_key)
           end
         end
