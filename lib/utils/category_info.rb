@@ -5,6 +5,7 @@ require_relative '../models/discourse_category'
 require_relative '../models/directory'
 require_relative '../errors/errors'
 require_relative 'recategorize_notes_frame'
+require_relative 'ui_utils'
 
 module Discourse
   module Utils
@@ -16,14 +17,14 @@ module Discourse
           @fetcher = DiscourseCategoryFetcher.new(@discourse_site, @api_key)
 
           category_info
-          check_for_missing
+          check_for_deleted_categories
         end
 
         private
 
         def category_info
           @fetcher.categories.each_value do |category|
-            CLI::UI::Frame.open("{{blue:#{category[:name]}}}") do
+            CLI::UI::Frame.open("Syncing {{blue:#{category[:name]}}}") do
               create_or_update_category(category)
               puts CLI::UI.fmt "  {{cyan:read_restricted}}: #{category[:read_restricted]}"
               description = category[:description_excerpt] || 'No description available.'
@@ -32,20 +33,19 @@ module Discourse
           end
         end
 
-        def check_for_missing
+        def check_for_deleted_categories
           local_categories = Discourse::DiscourseCategory.where(discourse_site: @discourse_site)
           local_categories.each do |local_category|
-            CLI::UI::Frame.open("Checking #{local_category.name}") do
-              if @fetcher.category_by_id(local_category.discourse_id)
-                puts 'category found'
-              else
-                handle_missing_category(local_category, local_categories)
-              end
+            next if @fetcher.category_by_id(local_category.discourse_id)
+
+            CLI::UI::Frame
+              .open("{{blue:#{local_category.name}}} no longer exists on Discourse") do
+              handle_deleted_category(local_category:, local_categories:)
             end
           end
         end
 
-        def handle_missing_category(local_category, local_categories)
+        def handle_deleted_category(local_category:, local_categories:)
           vault_directories = Discourse::Directory.where(discourse_category: local_category,
                                                          discourse_site: @discourse_site)
           spin_group = CLI::UI::SpinGroup.new
@@ -62,10 +62,32 @@ module Discourse
           options -= [local_category.name]
 
           vault_directories.each do |directory|
+            short_path = Discourse::Utils::Ui.fancy_path(directory.path)
             selected_name = nil
             loop do
-              prompt = "The category associated with #{directory.path} has been deleted " \
-                       "on #{@discourse_site.domain}. Select a new category for the directory"
+              prompt = "The category associated with {{blue:#{short_path}}} has been deleted on " \
+                       "{{blue:#{@discourse_site.domain}}}. Select a new category"
+              selected_name = CLI::UI::Prompt.ask(prompt, options:)
+              confirm = CLI::UI::Prompt.confirm("Is #{selected_name} correct?")
+              break if confirm
+            end
+
+            update_directory_category(spin_group:, directory:, categories: local_categories,
+                                      category_name: selected_name)
+          end
+        end
+
+        def new_category_for_directory(spin_group:, local_categories:, deleted_category:,
+                                       vault_directories:)
+          options = local_categories.pluck(:name)
+          options -= [deleted_category.name]
+
+          vault_directories.each do |directory|
+            short_path = Discourse::Utils::Ui.fancy_path(directory.path)
+            selected_name = nil
+            loop do
+              prompt = "The category associated with {{blue:#{short_path}}} has been deleted on " \
+                       "{{blue:#{@discourse_site.domain}}}. Select a new category"
               selected_name = CLI::UI::Prompt.ask(prompt, options:)
               confirm = CLI::UI::Prompt.confirm("Is #{selected_name} correct?")
               break if confirm
