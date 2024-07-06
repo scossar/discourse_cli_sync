@@ -71,7 +71,7 @@ module Discourse
         "#{@base_url}/t/#{post_data['topic_slug']}/#{post_data['topic_id']}"
       end
 
-      def update_topic(note, markdown)
+      def update_post(note, markdown)
         @client.update_post(markdown:, post_id: note.post_id).tap do |response|
           unless response
             raise Discourse::Errors::BaseError,

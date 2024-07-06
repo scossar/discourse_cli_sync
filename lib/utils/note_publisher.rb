@@ -151,15 +151,15 @@ module Discourse
 
         def publish_task(spin_group)
           if @note
-            update_topic(spin_group)
+            update_post(spin_group)
           else
             create_topic(spin_group)
           end
         end
 
-        def update_topic(spin_group)
+        def update_post(spin_group)
           spin_group.add("Updating topic for #{@title}") do |spinner|
-            @publisher.update_topic(@note, @markdown)
+            @publisher.update_post(@note, @markdown)
             spinner.update_title("Topic updated for #{@title}")
           end
           spin_group.wait
