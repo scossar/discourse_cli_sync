@@ -13,6 +13,7 @@ module Discourse
           @directory = directory
           @discourse_site = discourse_site
           @api_key = api_key
+          @categories = Discourse::DiscourseCategory.where(discourse_site: @discourse_site)
           selector_frame(use_subdirectories)
         end
 
@@ -62,7 +63,7 @@ module Discourse
           short_path = Discourse::Utils::Ui.fancy_path(dir.path)
           loop do
             category_name = CLI::UI::Prompt.ask("Category for #{short_path}",
-                                                options: discourse_category_names)
+                                                options: category_names)
             confirm = CLI::UI::Prompt.confirm("Is #{category_name} correct?")
             break if confirm
           end
@@ -86,8 +87,8 @@ module Discourse
           end
         end
 
-        def discourse_category_names
-          Discourse::DiscourseCategory.where(discourse_site: @discourse_site).pluck(:name)
+        def category_names
+          @categories.pluck(:name)
         end
       end
     end

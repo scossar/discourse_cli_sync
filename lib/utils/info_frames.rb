@@ -23,7 +23,7 @@ module Discourse
         end
 
         def vault_info_frame
-          CLI::UI::Frame.open('Syncing with local vault directories') do
+          CLI::UI::Frame.open('Syncing local vault directories') do
             Discourse::Utils::VaultInfo.call(@discourse_site)
           end
         end

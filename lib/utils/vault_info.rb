@@ -18,7 +18,7 @@ module Discourse
           directories = all_directories
           directories.each do |path|
             short_path = Discourse::Utils::Ui.fancy_path(path)
-            CLI::UI::Frame.open(short_path) do
+            CLI::UI::Frame.open("{{blue:#{short_path}}}") do
               find_or_create_directory(path)
             end
           end
@@ -33,7 +33,7 @@ module Discourse
           spin_group.add('Updating Directories') do |spinner|
             Discourse::Directory.create_or_update(path:, discourse_site: @discourse_site)
             short_path = Discourse::Utils::Ui.fancy_path(path)
-            spinner.update_title("Updated database entry for #{short_path}")
+            spinner.update_title("Updated database entry for {{blue:#{short_path}}}")
           end
 
           spin_group.wait
