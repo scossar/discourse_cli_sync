@@ -39,55 +39,41 @@ module Discourse
             next if @fetcher.category_by_id(local_category.discourse_id)
 
             CLI::UI::Frame
-              .open("{{blue:#{local_category.name}}} no longer exists on Discourse") do
-              handle_deleted_category(local_category:, local_categories:)
+              .open("Not syncing {{blue:#{local_category.name}}}") do
+              handle_deleted_category(deleted_category: local_category, local_categories:)
             end
           end
         end
 
-        def handle_deleted_category(local_category:, local_categories:)
-          vault_directories = Discourse::Directory.where(discourse_category: local_category,
-                                                         discourse_site: @discourse_site)
+        def handle_deleted_category(deleted_category:, local_categories:)
+          directories = Discourse::Directory.where(discourse_category: deleted_category,
+                                                   discourse_site: @discourse_site)
           spin_group = CLI::UI::SpinGroup.new
           spin_group.failure_debrief do |_title, exception|
             puts CLI::UI.fmt "  #{exception}"
           end
 
-          unless vault_directories.any?
+          unless directories.any?
             return handle_delete_category(spin_group:,
-                                          category: local_category)
+                                          deleted_category:)
           end
 
-          options = local_categories.pluck(:name)
-          options -= [local_category.name]
-
-          vault_directories.each do |directory|
-            short_path = Discourse::Utils::Ui.fancy_path(directory.path)
-            selected_name = nil
-            loop do
-              prompt = "The category associated with {{blue:#{short_path}}} has been deleted on " \
-                       "{{blue:#{@discourse_site.domain}}}. Select a new category"
-              selected_name = CLI::UI::Prompt.ask(prompt, options:)
-              confirm = CLI::UI::Prompt.confirm("Is #{selected_name} correct?")
-              break if confirm
-            end
-
-            update_directory_category(spin_group:, directory:, categories: local_categories,
-                                      category_name: selected_name)
-          end
+          categories_for_directories(spin_group:, local_categories:,
+                                     deleted_category:, directories:)
         end
 
-        def new_category_for_directory(spin_group:, local_categories:, deleted_category:,
-                                       vault_directories:)
+        def categories_for_directories(spin_group:, local_categories:, deleted_category:,
+                                       directories:)
           options = local_categories.pluck(:name)
           options -= [deleted_category.name]
 
-          vault_directories.each do |directory|
+          directories.each do |directory|
             short_path = Discourse::Utils::Ui.fancy_path(directory.path)
             selected_name = nil
             loop do
-              prompt = "The category associated with {{blue:#{short_path}}} has been deleted on " \
-                       "{{blue:#{@discourse_site.domain}}}. Select a new category"
+              prompt = "The category {{blue:#{deleted_category.name}}} has been deleted on " \
+                       "{{blue:#{@discourse_site.domain}}}. Select a new category for " \
+                       "{{blue:#{short_path}}}"
               selected_name = CLI::UI::Prompt.ask(prompt, options:)
               confirm = CLI::UI::Prompt.confirm("Is #{selected_name} correct?")
               break if confirm
@@ -104,22 +90,31 @@ module Discourse
           end
           spin_group.add("Updating category for #{directory.path}") do |spinner|
             directory.update(discourse_category:).tap do |dir|
-              raise Discourse::Errors::BaseError unless dir
+              raise Discourse::Errors::BaseError, 'Failed to update directory category' unless dir
             end
-            spinner.update_title("Updated category for #{directory.path} to #{discourse_category.name}")
+            spinner
+              .update_title("Updated category for #{directory.path} to #{discourse_category.name}")
           end
           spin_group.wait
 
           Discourse::Utils::RecategorizeNotesFrame.call(directory:,
-                                                        discourse_site: @discourse_site, api_key: @api_key)
+                                                        discourse_site: @discourse_site,
+                                                        api_key: @api_key)
 
-          handle_delete_category(spin_group:, category: discourse_category)
+          handle_delete_category(spin_group:, deleted_category: discourse_category)
         end
 
-        def handle_delete_category(spin_group:, category:)
-          spin_group.add("Deleting local entry for #{category.name}") do |spinner|
-            Discourse::DiscourseCategory.find(category.id).destroy
-            spinner.update_title("Deleted local entry for #{category.name}")
+        def handle_delete_category(spin_group:, deleted_category:)
+          spin_group.add("Deleting local entry for #{deleted_category.name}") do |spinner|
+            Discourse::DiscourseCategory.find(deleted_category.id).destroy.tap do |result|
+              unless result
+                raise Discourse::Errors::BaseError,
+                      "Failed to destroy #{deleted_category.name}"
+              end
+            end
+            spinner.update_title("{{blue:#{deleted_category.name}}} has been deleted on " \
+                                 "{{blue:#{@discourse_site.doman}}}. " \
+                                 'Entry removed from local database.')
           end
           spin_group.wait
         end
