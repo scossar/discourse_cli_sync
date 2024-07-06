@@ -11,8 +11,9 @@ module Discourse
     class NotePublisher
       class << self
         def call(note_path:, directory:, api_key:, discourse_site:, require_confirmation: false)
+          @discourse_site = discourse_site
           @publisher = Discourse::Services::Publisher.new(note_path:, directory:, api_key:,
-                                                          discourse_site:)
+                                                          discourse_site: @discourse_site)
           @title, _front_matter, @markdown = @publisher.parse_file
           @directory = directory
           @note = Discourse::Note.find_by(title: @title, directory: @directory)
@@ -90,7 +91,9 @@ module Discourse
               raise Discourse::Errors::BaseError, 'Note could not be updated'
             end
           else
-            note = Discourse::Note.create(title: @title, directory: @directory, local_only:)
+            note = Discourse::Note.create(title: @title, directory: @directory, local_only:,
+                                          discourse_category: @directory.discourse_category,
+                                          discourse_site: @discourse_site)
             raise Discourse::Errors::BaseError, 'Note could not be created' unless note.persisted?
           end
         rescue StandardError => e

@@ -4,7 +4,7 @@ module Discourse
   class Note < ActiveRecord::Base
     belongs_to :directory
     belongs_to :discourse_category
-    belong_to :discourse_site
+    belongs_to :discourse_site
 
     validates :title, presence: true, uniqueness: { scope: :directory_id }
     validates :local_only, inclusion: { in: [true, false] }
