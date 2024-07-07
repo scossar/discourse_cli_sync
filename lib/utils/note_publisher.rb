@@ -17,6 +17,8 @@ module Discourse
           @title, _front_matter, @markdown = @publisher.parse_file
           @directory = directory
           # TODO: if this works, the unique constraint needs to be discourse_site/title
+          # this isn't quite right. Don't rely on ActiveRecord here, the note is the actual
+          # note that's in the directory.
           @note = Discourse::Note.find_by(title: @title, discourse_site: @discourse_site)
           publishing_frame(require_confirmation)
         end
