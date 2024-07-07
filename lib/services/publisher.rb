@@ -79,6 +79,8 @@ module Discourse
           end
         end
       end
+
+      def update_topic(topic_id, params); end
     end
   end
 end

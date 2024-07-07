@@ -152,6 +152,7 @@ module Discourse
         def publish_task(spin_group)
           if @note
             update_post(spin_group)
+            update_topic(spin_group)
           else
             create_topic(spin_group)
           end
@@ -161,6 +162,18 @@ module Discourse
           spin_group.add("Updating topic for #{@title}") do |spinner|
             @publisher.update_post(@note, @markdown)
             spinner.update_title("Topic updated for #{@title}")
+          end
+          spin_group.wait
+        end
+
+        def update_topic(spin_group)
+          return if @note.discourse_category == @directory&.discourse_category
+
+          spin_group.add("Recategorizing #{@note.title}") do |spinner|
+            @publisher.update_topic(@note.topic_id,
+                                    { category_id: @directory.discourse_category.discourse_id })
+            spinner
+              .update_title("#{@note.title} recategorized to #{@directory.discourse_category.name}")
           end
           spin_group.wait
         end
