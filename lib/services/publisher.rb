@@ -80,7 +80,16 @@ module Discourse
         end
       end
 
-      def update_topic(topic_id, params); end
+      def update_topic(topic_id, params)
+        @client.update_topic(topic_id:, params:).tap do |response|
+          unless response
+            raise Discourse::Errors::BaseError,
+                  "Failed to update topic for topic_id: #{topic_id}"
+          end
+        end
+      rescue StandardError => e
+        raise Discourse::Errors::BaseError, "Error updating topic: #{e.message}"
+      end
     end
   end
 end

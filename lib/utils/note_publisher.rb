@@ -16,7 +16,8 @@ module Discourse
                                                           discourse_site: @discourse_site)
           @title, _front_matter, @markdown = @publisher.parse_file
           @directory = directory
-          @note = Discourse::Note.find_by(title: @title, directory: @directory)
+          # TODO: if this works, the unique constraint needs to be discourse_site/title
+          @note = Discourse::Note.find_by(title: @title, discourse_site: @discourse_site)
           publishing_frame(require_confirmation)
         end
 
@@ -167,11 +168,13 @@ module Discourse
         end
 
         def update_topic(spin_group)
-          return if @note.discourse_category == @directory&.discourse_category
+          return if @note.directory == @directory
 
           spin_group.add("Recategorizing #{@note.title}") do |spinner|
             @publisher.update_topic(@note.topic_id,
                                     { category_id: @directory.discourse_category.discourse_id })
+            @note.update(directory: @directory)
+            # TODO: handle error here
             spinner
               .update_title("#{@note.title} recategorized to #{@directory.discourse_category.name}")
           end
