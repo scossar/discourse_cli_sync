@@ -56,7 +56,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_06_215648) do
     t.integer "topic_id"
     t.integer "post_id"
     t.string "archetype", default: "regular", null: false
-    t.integer "directory_id"
+    t.integer "directory_id
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "discourse_category_id"
