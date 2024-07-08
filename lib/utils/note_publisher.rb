@@ -67,12 +67,12 @@ module Discourse
         def confirm_local_status(spin_group)
           if @note&.local_only
             keep_local_status = CLI::UI::Prompt
-                                .confirm("#{@title} is set to local only. Keep that status?")
+                                .confirm("{{green:#{@title}}} is set to local only. Keep that status?")
             return :local_only if keep_local_status
 
             return local_only_spinner(spin_group, false)
           else
-            local_only = CLI::UI::Prompt.confirm("Set #{@title} to local only?")
+            local_only = CLI::UI::Prompt.confirm("Set {green:#{@title}}} to local only?")
             return local_only_spinner(spin_group, true) if local_only
           end
           :not_local
@@ -80,9 +80,9 @@ module Discourse
 
         def local_only_spinner(spin_group, local_only)
           spinner_title = if local_only
-                            "Configuring #{@title} to be a local only note"
+                            "Configuring {{green:#{@title}}} to be a local only note"
                           else
-                            "Configuring #{@title} to be published to Discourse"
+                            "Configuring {{green:#{@title}}} to be published to Discourse"
                           end
 
           spin_group.add(spinner_title) do
@@ -109,17 +109,18 @@ module Discourse
         end
 
         def confirm_publish_status(spin_group)
-          publish_status = CLI::UI::Prompt.ask("Publish #{@title}?",
+          publish_status = CLI::UI::Prompt.ask("Publish {{green:#{@title}}}?",
                                                options: ['publish', 'skip', 'show excerpt'])
           if publish_status == 'show excerpt'
-            CLI::UI::Frame.open("{{blue:#{@title}}}") do
+            CLI::UI::Frame.open("{{green:#{@title}}}") do
               excerpt = @markdown.split[0, 50].join(' ')
               puts CLI::UI.fmt excerpt
             end
-            publish_status = CLI::UI::Prompt.ask("Publish #{@title}?", options: %w[publish skip])
+            publish_status = CLI::UI::Prompt.ask("Publish {{green:#{@title}}}?",
+                                                 options: %w[publish skip])
           end
           unless publish_status == 'publish'
-            spin_group.add("Skipping publishing for #{@title}") do
+            spin_group.add("Skipping publishing for {{green:#{@title}}}") do
               sleep 0.25
             end
             spin_group.wait
@@ -131,7 +132,7 @@ module Discourse
           local_only = @note&.local_only
           return false unless local_only
 
-          spin_group.add("Skipping publishing local only note #{@title}") do
+          spin_group.add("Skipping publishing local only note {{green:#{@title}}}") do
             sleep 0.25
           end
           spin_group.wait
@@ -139,7 +140,7 @@ module Discourse
         end
 
         def attachments_task(spin_group)
-          spin_group.add("Handling uploads for #{@title}") do |spinner|
+          spin_group.add("Handling uploads for {{green:#{@title}}}") do |spinner|
             @markdown, filenames = @publisher.handle_attachments(@markdown)
             spinner_title = uploads_title(filenames)
             spinner.update_title(spinner_title)
@@ -149,7 +150,7 @@ module Discourse
         end
 
         def internal_links_task(spin_group)
-          spin_group.add("Handling internal links for #{@title}") do |spinner|
+          spin_group.add("Handling internal links for {{green:#{@title}}}") do |spinner|
             @markdown, stub_topics = @publisher.handle_internal_links(@markdown)
             spinner_title = links_title(stub_topics)
             spinner.update_title(spinner_title)
@@ -168,9 +169,9 @@ module Discourse
         end
 
         def update_post(spin_group)
-          spin_group.add("Updating topic for #{@title}") do |spinner|
+          spin_group.add("Updating topic for {{green:#{@title}}}") do |spinner|
             @publisher.update_post(@note, @markdown)
-            spinner.update_title("Topic updated for #{@title}")
+            spinner.update_title("Topic updated for {{green:#{@title}}}")
           end
           spin_group.wait
         end
@@ -178,14 +179,14 @@ module Discourse
         def update_topic(spin_group)
           return if @note.directory == @directory
 
-          spin_group.add("Recategorizing #{@note.title}") do |spinner|
+          spin_group.add("Recategorizing {{green:#{@note.title}}}") do |spinner|
             @publisher.update_topic(@note.topic_id,
                                     { category_id: @directory.discourse_category.discourse_id })
             @note.update(directory: @directory).tap do |note|
               raise Discourse::Errors::BaseError, 'Note entry could not be updated' unless note
             end
             spinner
-              .update_title("#{@note.title} recategorized to #{@directory.discourse_category.name}")
+              .update_title("{{green:#{@note.title}}} recategorized to #{@directory.discourse_category.name}")
           end
           spin_group.wait
         end
@@ -193,7 +194,7 @@ module Discourse
         def create_topic(spin_group)
           spin_group.add("Creating new topic for #{@title}") do |spinner|
             @publisher.create_topic(@title, @markdown, @front_matter)
-            spinner.update_title("Topic created for #{@title}")
+            spinner.update_title("Topic created for {{green:#{@title}}}")
           end
           spin_group.wait
         end
