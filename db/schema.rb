@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_08_190143) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_08_190717) do
   create_table "directories", force: :cascade do |t|
     t.string "path", null: false
     t.integer "discourse_category_id"
@@ -59,11 +59,11 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_190143) do
     t.integer "directory_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["directory_id", "post_id"], name: "index_notes_on_directory_id_and_post_id", unique: true
     t.index ["directory_id", "title"], name: "index_notes_on_directory_id_and_title", unique: true
+    t.index ["directory_id", "topic_id"], name: "index_notes_on_directory_id_and_topic_id", unique: true
+    t.index ["directory_id", "topic_url"], name: "index_notes_on_directory_id_and_topic_url", unique: true
     t.index ["directory_id"], name: "index_notes_on_directory_id"
-    t.index ["post_id"], name: "index_notes_on_post_id", unique: true
-    t.index ["topic_id"], name: "index_notes_on_topic_id", unique: true
-    t.index ["topic_url"], name: "index_notes_on_topic_url", unique: true
   end
 
   add_foreign_key "directories", "discourse_categories"
