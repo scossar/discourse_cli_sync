@@ -45,7 +45,6 @@ module Discourse
         result[cat_hash['id']] = {
           id: cat_hash['id'],
           name: cat_hash['name'],
-          slug: cat_hash['slug'],
           read_restricted: cat_hash['read_restricted'],
           parent_category_id: cat_hash['parent_category_id'],
           description_excerpt: cat_hash['description_excerpt']

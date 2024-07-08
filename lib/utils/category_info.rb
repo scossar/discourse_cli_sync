@@ -128,7 +128,6 @@ module Discourse
           spin_group.add('Updating local category data') do |spinner|
             Discourse::DiscourseCategory
               .create_or_update(name: category[:name],
-                                slug: category[:slug],
                                 read_restricted: category[:read_restricted],
                                 description: category[:description_excerpt],
                                 discourse_id: category[:id],
