@@ -25,7 +25,7 @@ module Discourse
           selected = nil
           loop do
             selected = CLI::UI::Prompt.ask('Select existing site, or add a new one', options:)
-            confirm = CLI::UI::Prompt.confirm("You chose #{selected}. Is that correct?")
+            confirm = CLI::UI::Prompt.confirm("Is {{blue:#{selected}}} correct?")
             break if confirm
           end
 
@@ -46,7 +46,7 @@ module Discourse
         def confirm_site(domain)
           site = Discourse::DiscourseSite.find_by(domain:)
           discourse_username, vault_directory = config_for_site(site)
-          confirm_prompt = CLI::UI.fmt("Existing configuration for #{domain}\n  " \
+          confirm_prompt = CLI::UI.fmt("Existing configuration for {{blue:#{domain}}}\n  " \
                                        "discourse_username: #{discourse_username}\n  " \
                                        "vault_directory: #{vault_directory}\n" \
                                        'Are these values correct?')
@@ -58,7 +58,8 @@ module Discourse
 
         def update_config(domain:, discourse_username:, vault_directory:)
           site = Discourse::DiscourseSite.find_by(domain:)
-          update_username = CLI::UI::Prompt.confirm("Update username: #{discourse_username}?")
+          update_username = CLI::UI::Prompt
+                            .confirm("Update username: #{discourse_username}?")
           discourse_username = configure_username(domain) if update_username
           update_vault_directory = CLI::UI::Prompt
                                    .confirm("Update vault directory: #{vault_directory}?")
@@ -74,7 +75,7 @@ module Discourse
           loop do
             base_url = CLI::UI::Prompt.ask('Discourse base URL')
             domain, error_message = extract_domain(base_url)
-            confirm = CLI::UI::Prompt.confirm("Is #{domain} correct?") if domain
+            confirm = CLI::UI::Prompt.confirm("Is {{blue:#{domain}}} correct?") if domain
             break if confirm
 
             puts CLI::UI.fmt(error_message)
@@ -85,8 +86,8 @@ module Discourse
         def configure_username(domain)
           discourse_username = nil
           loop do
-            discourse_username = CLI::UI::Prompt.ask("Discourse username for #{domain}?")
-            confirm = CLI::UI::Prompt.confirm("Is #{discourse_username} correct?")
+            discourse_username = CLI::UI::Prompt.ask("Discourse username for {{blue:#{domain}}}?")
+            confirm = CLI::UI::Prompt.confirm("Is {{blue:#{discourse_username}}} correct?")
             break if confirm
           end
 
@@ -96,8 +97,8 @@ module Discourse
         def configure_vault_directory(domain)
           vault_directory = nil
           loop do
-            vault_directory = CLI::UI::Prompt.ask("Vault directory for #{domain}")
-            confirm = CLI::UI::Prompt.confirm("Is #{vault_directory} correct?")
+            vault_directory = CLI::UI::Prompt.ask("Vault directory for {{blue:#{domain}}}")
+            confirm = CLI::UI::Prompt.confirm("Is {{blue:#{vault_directory}}} correct?")
             break if confirm
           end
 

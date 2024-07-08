@@ -40,12 +40,11 @@ module Discourse
 
         def handle_configured_category(dir:, configured_category:)
           short_path = Discourse::Utils::Ui.fancy_path(dir.path)
-          reconfigure = CLI::UI::Prompt
-                        .confirm("#{short_path} has been configured to publish notes " \
-                                 "to #{configured_category.name}. Would you like to " \
-                                 'reconfigure it?')
+          keep_configuration = CLI::UI::Prompt
+                               .confirm("#{short_path} has been configured to publish notes " \
+                                        "to #{configured_category.name}. Keep that configuration?")
 
-          return unless reconfigure
+          return if keep_configuration
 
           confirm = CLI::UI::Prompt
                     .confirm("Confirm that you want to change the category for #{short_path}")

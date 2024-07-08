@@ -18,7 +18,7 @@ module Discourse
 
         def tag_frame
           site_tag = @discourse_site&.site_tag
-          CLI::UI::Frame.open("Tag for notes published from #{@discourse_site.domain}") do
+          CLI::UI::Frame.open("Tag for notes published to {{blue:#{@discourse_site.domain}}}") do
             if site_tag
               confirm_site_tag(site_tag)
             else
@@ -28,14 +28,14 @@ module Discourse
         end
 
         def confirm_site_tag(site_tag)
-          change_site_tag = CLI::UI::Prompt
-                            .confirm("Notes published to #{@discourse_site.domain} will be  " \
-                                     "tagged with '#{site_tag}'. Would you like to change this?")
-          return unless change_site_tag
+          keep_site_tag = CLI::UI::Prompt
+                          .confirm("Notes published to {{blue:#{@discourse_site.domain}}} will " \
+                                   "be tagged with '{{blue:#{site_tag}}}'. Keep configuration?")
+          return if keep_site_tag
 
           confirm = CLI::UI::Prompt
                     .confirm('Confirm that you want to change or remove the tag used for ' \
-                             "#{@discourse_site.domain}.")
+                             "{{blue:#{@discourse_site.domain}}}.")
           return unless confirm
 
           set_site_tag
