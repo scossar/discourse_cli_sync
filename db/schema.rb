@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_08_205713) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_08_215334) do
   create_table "directories", force: :cascade do |t|
     t.string "path", null: false
     t.integer "discourse_site_id"
@@ -29,6 +29,8 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_08_205713) do
     t.integer "discourse_site_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "discourse_id"
+    t.index ["discourse_site_id", "discourse_id"], name: "idx_on_discourse_site_id_discourse_id_c5cfd45617"
     t.index ["discourse_site_id", "name"], name: "index_discourse_categories_on_discourse_site_id_and_name", unique: true
     t.index ["discourse_site_id"], name: "index_discourse_categories_on_discourse_site_id"
   end
