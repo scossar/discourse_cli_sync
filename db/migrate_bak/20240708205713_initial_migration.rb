@@ -2,12 +2,12 @@ class InitialMigration < ActiveRecord::Migration[7.1]
   def change
     create_table :discourse_sites do |t|
       t.string :domain, null: false
-      t.string :base_url, null: false
+      t.string :url, null: false
       t.string :iv
       t.string :salt
       t.string :encrypted_api_key
+      t.string :base_url, null: false
       t.string :vault_directory, null: false
-      t.string :site_tag
       t.string :discourse_username, null: false
 
       t.timestamps
@@ -38,7 +38,7 @@ class InitialMigration < ActiveRecord::Migration[7.1]
 
       t.timestamps
     end
-    add_index :directories, %i[discourse_site_id path], unique: true
+    add_index :discourse_categories, %i[discourse_site_id path], unique: true
 
     create_table :discourse_categories do |t|
       t.string :name, null: false
