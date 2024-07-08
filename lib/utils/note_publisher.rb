@@ -180,8 +180,9 @@ module Discourse
           spin_group.add("Recategorizing #{@note.title}") do |spinner|
             @publisher.update_topic(@note.topic_id,
                                     { category_id: @directory.discourse_category.discourse_id })
-            @note.update(directory: @directory)
-            # TODO: handle error here
+            @note.update(directory: @directory).tap do |note|
+              raise Discourse::Errors::BaseError, 'Note entry could not be updated' unless note
+            end
             spinner
               .update_title("#{@note.title} recategorized to #{@directory.discourse_category.name}")
           end
