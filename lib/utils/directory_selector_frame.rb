@@ -23,16 +23,15 @@ module Discourse
 
           include_subdirectories = false
           directory = nil
-          CLI::UI::Frame.open("Select directory for {{blue:#{@discourse_site.domain}}}") do
+          CLI::UI::Frame.open("Select directory for #{@discourse_site.domain}") do
             loop do
               directory = CLI::UI::Prompt.ask('Select directory', options: short_paths)
-              confirm = CLI::UI::Prompt.confirm("Is {{blue:#{directory}}} correct?")
+              confirm = CLI::UI::Prompt.confirm("Is #{directory} correct?")
               break if confirm
             end
             if confirm_subdirectories && subdirectories?(path: directory)
               include_subdirectories = CLI::UI::Prompt
-                                       .confirm('Also select subdirectories of ' \
-                                                "{{blue:#{directory}}}?")
+                                       .confirm("Also select subdirectories of #{directory}?")
             end
           end
           selected_directory = directory_from_short_path(directories:, path_mapping:,

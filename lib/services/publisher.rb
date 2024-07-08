@@ -56,12 +56,13 @@ module Discourse
       end
 
       def update_front_matter(post_id, front_matter, markdown)
-        site_id_property = "#{@discourse_site.domain}_id: #{post_id}"
+        post_id_key = "#{@discourse_site.domain}_id"
+        front_matter[post_id_key] = post_id.to_s
         properties = ''
         front_matter.each do |key, value|
           properties += "\n#{key}: #{value}"
         end
-        properties = "---\n#{site_id_property}#{properties}\n---\n"
+        properties = "---\n#{properties}\n---\n"
 
         updated_file = "#{properties}\n#{markdown}"
 
@@ -78,7 +79,8 @@ module Discourse
         end
         post_id
       rescue StandardError => e
-        raise Discourse::Errors::BaseError, "Error creating Note: #{e.message}"
+        raise Discourse::Errors::BaseError,
+              "Error creating Note for post_id #{post_id}: #{e.message}"
       end
 
       def url_from_post_data(post_data)
