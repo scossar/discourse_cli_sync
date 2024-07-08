@@ -16,7 +16,6 @@ module Discourse
     def self.create_or_update(params)
       name, slug, read_restricted, description, discourse_id, discourse_site =
         create_or_update_params(params)
-      Discourse::Utils::Logger.debug("name: #{name}")
 
       begin
         category = DiscourseCategory.find_or_initialize_by(discourse_id:,

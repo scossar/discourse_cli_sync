@@ -16,11 +16,19 @@ module Discourse
                                                           discourse_site: @discourse_site)
           @title, @front_matter, @markdown = @publisher.parse_file
           @directory = directory
-          @note = Discourse::Note.find_by(title: @title, discourse_site: @discourse_site)
+          @note = find_note(@front_matter)
           publishing_frame(require_confirmation)
         end
 
         private
+
+        def find_note(front_matter)
+          key = "#{@discourse_site.domain}_id"
+          post_id = front_matter[key].to_i
+          return nil unless post_id
+
+          Discourse::Note.find_by(post_id:)
+        end
 
         def publishing_frame(require_confirmation)
           spin_group = CLI::UI::SpinGroup.new
@@ -49,10 +57,6 @@ module Discourse
 
         def publish(spin_group)
           skip = local_only_task(spin_group)
-          CLI::UI::Frame.open('FRONT MATTER TEST') do
-            puts 'front matter:'
-            p @front_matter
-          end
           return if skip
 
           attachments_task(spin_group)
