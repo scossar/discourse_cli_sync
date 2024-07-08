@@ -16,9 +16,6 @@ module Discourse
                                                           discourse_site: @discourse_site)
           @title, @front_matter, @markdown = @publisher.parse_file
           @directory = directory
-          # TODO: if this works, the unique Constraint needs to be discourse_site/title
-          # this isn't quite right. Don't rely on ActiveRecord here, the note is the actual
-          # note that's in the directory.
           @note = Discourse::Note.find_by(title: @title, discourse_site: @discourse_site)
           publishing_frame(require_confirmation)
         end
@@ -52,6 +49,10 @@ module Discourse
 
         def publish(spin_group)
           skip = local_only_task(spin_group)
+          CLI::UI::Frame.open('FRONT MATTER TEST') do
+            puts 'front matter:'
+            p @front_matter
+          end
           return if skip
 
           attachments_task(spin_group)
@@ -185,7 +186,7 @@ module Discourse
 
         def create_topic(spin_group)
           spin_group.add("Creating new topic for #{@title}") do |spinner|
-            @publisher.create_topic(@title, @markdown)
+            @publisher.create_topic(@title, @markdown, @front_matter)
             spinner.update_title("Topic created for #{@title}")
           end
           spin_group.wait

@@ -42,7 +42,7 @@ module Discourse
         internal_link_handler.handle
       end
 
-      def create_topic(title, markdown)
+      def create_topic(title, markdown, front_matter)
         @client.create_topic(title:, markdown:,
                              category: @directory.discourse_category.discourse_id,
                              tags: [@discourse_site.site_tag]).tap do |response|
@@ -50,8 +50,22 @@ module Discourse
             raise Discourse::Errors::BaseError,
                   "Failed to create topic for #{title}"
           end
-          create_note_entry(title, response)
+          post_id = create_note_entry(title, response)
+          update_front_matter(post_id, front_matter, markdown)
         end
+      end
+
+      def update_front_matter(post_id, front_matter, markdown)
+        site_id_property = "#{@discourse_site.domain}_id: #{post_id}"
+        properties = ''
+        front_matter.each do |key, value|
+          properties += "\n#{key}: #{value}"
+        end
+        properties = "---\n#{site_id_property}#{properties}\n---\n"
+
+        updated_file = "#{properties}\n#{markdown}"
+
+        File.write(@note_path, updated_file)
       end
 
       def create_note_entry(title, post_data)
@@ -63,6 +77,7 @@ module Discourse
                     discourse_site: @discourse_site).tap do |note|
           raise Discourse::Errors::BaseError, 'Note could not be created' unless note.persisted?
         end
+        post_id
       rescue StandardError => e
         raise Discourse::Errors::BaseError, "Error creating Note: #{e.message}"
       end

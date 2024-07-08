@@ -38,6 +38,7 @@ module Discourse
       fix_category_names(parsed_categories)
     end
 
+    # TODO: not sure about the use of each_with_object here:
     def parse_categories(categories)
       categories.each_with_object({}) do |cat, result|
         cat_hash = cat.to_h
