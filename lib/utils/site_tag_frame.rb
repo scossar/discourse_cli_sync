@@ -18,7 +18,7 @@ module Discourse
 
         def tag_frame
           site_tag = @discourse_site&.site_tag
-          CLI::UI::Frame.open("Tag for notes published to {{blue:#{@discourse_site.domain}}}") do
+          CLI::UI::Frame.open("Site tag for {{blue:#{@discourse_site.domain}}}") do
             if site_tag
               confirm_site_tag(site_tag)
             else
@@ -29,8 +29,8 @@ module Discourse
 
         def confirm_site_tag(site_tag)
           keep_site_tag = CLI::UI::Prompt
-                          .confirm("Notes published to {{blue:#{@discourse_site.domain}}} will " \
-                                   "be tagged with '{{blue:#{site_tag}}}'. Keep configuration?")
+                          .confirm("All notes published to {{blue:#{@discourse_site.domain}}} " \
+                                   "will be tagged with '#{site_tag}'. Keep configuration?")
           return if keep_site_tag
 
           confirm = CLI::UI::Prompt

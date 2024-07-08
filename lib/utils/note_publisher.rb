@@ -112,8 +112,10 @@ module Discourse
           publish_status = CLI::UI::Prompt.ask("Publish #{@title}?",
                                                options: ['publish', 'skip', 'show excerpt'])
           if publish_status == 'show excerpt'
-            excerpt = @markdown.split[0, 50].join(' ')
-            puts CLI::UI.fmt "Note excerpt:\n#{excerpt}..."
+            CLI::UI::Frame.open("{{blue:#{@title}}}") do
+              excerpt = @markdown.split[0, 50].join(' ')
+              puts CLI::UI.fmt excerpt
+            end
             publish_status = CLI::UI::Prompt.ask("Publish #{@title}?", options: %w[publish skip])
           end
           unless publish_status == 'publish'

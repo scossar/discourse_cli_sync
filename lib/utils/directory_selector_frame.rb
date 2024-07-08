@@ -23,7 +23,7 @@ module Discourse
 
           include_subdirectories = false
           directory = nil
-          CLI::UI::Frame.open("Select directory for #{@discourse_site.domain}") do
+          CLI::UI::Frame.open("Select directory for {{blue:#{@discourse_site.domain}}}") do
             loop do
               directory = CLI::UI::Prompt.ask('Select directory', options: short_paths)
               confirm = CLI::UI::Prompt.confirm("Is #{directory} correct?")
