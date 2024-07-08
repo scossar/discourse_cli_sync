@@ -100,7 +100,6 @@ module Discourse
             end
           else
             note = Discourse::Note.create(title: @title, directory: @directory, local_only:,
-                                          discourse_category: @directory.discourse_category,
                                           discourse_site: @discourse_site)
             raise Discourse::Errors::BaseError, 'Note could not be created' unless note.persisted?
           end

@@ -68,7 +68,7 @@ module Discourse
         topic_id = post_data['topic_id']
         post_id = post_data['id']
         Note.create(title:, topic_url:, topic_id:, post_id:,
-                    directory: @directory, discourse_category: @directory.discourse_category,
+                    directory: @directory,
                     discourse_site: @discourse_site).tap do |note|
           raise Discourse::Errors::BaseError, 'Note could not be created' unless note.persisted?
         end
