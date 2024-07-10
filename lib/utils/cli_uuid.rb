@@ -6,6 +6,7 @@ require 'securerandom'
 
 require_relative '../errors/errors'
 require_relative '../models/directory'
+require_relative '../models/note'
 
 module Discourse
   module Utils
@@ -15,6 +16,7 @@ module Discourse
           @discourse_site = discourse_site
           @vault_directory = @discourse_site.vault_directory
           @note_uuid_key = 'cli_uuid'
+          @directories = Discourse::Directory.where(discourse_site: @discourse_site)
           @directory_files = directory_files
           ensure_cli_uuid
           update_notes
@@ -45,7 +47,26 @@ module Discourse
           end
         end
 
-        def update_notes; end
+        def update_notes
+          CLI::UI::Frame.open("Updating note entries for #{@vault_directory}") do
+            spin_group = CLI::UI::SpinGroup.new
+            spin_group.failure_debrief do |_title, exception|
+              puts CLI::UI.fmt "  #{exception}"
+            end
+            @directory_files.each do |file|
+              file_name = File.basename(file)
+              spin_group.add("Creating or updating entry for #{file_name}") do |spinner|
+                front_matter, _markdown = parse_file(file)
+                cli_uuid = front_matter[@note_uuid_key]
+                title = File.basename(file, '.md')
+                Discourse::Note.create_or_update(discourse_site: @discourse_site,
+                                                 file_id: cli_uuid, title:)
+                spinner.update_title("Note saved for #{file_name}")
+              end
+              spin_group.wait
+            end
+          end
+        end
 
         def handle_front_matter(file)
           front_matter, markdown = parse_file(file)
@@ -74,16 +95,11 @@ module Discourse
         end
 
         def directory_files
-          files = all_directories.map do |dir|
-            Dir.glob(File.join(dir, '*.md'))
+          dir_paths = @directories.pluck(:path)
+          files = dir_paths.map do |path|
+            Dir.glob(File.join(path, '*.md'))
           end
           files.flatten
-        end
-
-        def all_directories
-          root_dir = File.expand_path(@vault_directory)
-          dirs = Dir.glob(File.join(root_dir, '**', '*/'))
-          dirs << root_dir
         end
 
         def parse_file(file)
