@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_10_211822) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_10_214422) do
   create_table "directories", force: :cascade do |t|
     t.string "path", null: false
     t.integer "discourse_site_id"
@@ -49,6 +49,25 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_10_211822) do
     t.index ["domain", "discourse_username"], name: "index_discourse_sites_on_domain_and_discourse_username", unique: true
   end
 
+  create_table "discourse_topics", force: :cascade do |t|
+    t.string "topic_url"
+    t.integer "topic_id"
+    t.integer "post_id"
+    t.boolean "local_only", default: false, null: false
+    t.integer "discourse_site_id"
+    t.integer "directory_id"
+    t.integer "note_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["directory_id"], name: "index_discourse_topics_on_directory_id"
+    t.index ["discourse_site_id", "note_id"], name: "index_discourse_topics_on_discourse_site_id_and_note_id", unique: true
+    t.index ["discourse_site_id", "post_id"], name: "index_discourse_topics_on_discourse_site_id_and_post_id", unique: true
+    t.index ["discourse_site_id", "topic_id"], name: "index_discourse_topics_on_discourse_site_id_and_topic_id", unique: true
+    t.index ["discourse_site_id", "topic_url"], name: "index_discourse_topics_on_discourse_site_id_and_topic_url", unique: true
+    t.index ["discourse_site_id"], name: "index_discourse_topics_on_discourse_site_id"
+    t.index ["note_id"], name: "index_discourse_topics_on_note_id"
+  end
+
   create_table "notes", force: :cascade do |t|
     t.string "title", null: false
     t.boolean "local_only", default: false, null: false
@@ -60,4 +79,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_10_211822) do
   add_foreign_key "directories", "discourse_categories"
   add_foreign_key "directories", "discourse_sites"
   add_foreign_key "discourse_categories", "discourse_sites"
+  add_foreign_key "discourse_topics", "directories"
+  add_foreign_key "discourse_topics", "discourse_sites"
+  add_foreign_key "discourse_topics", "notes"
 end
