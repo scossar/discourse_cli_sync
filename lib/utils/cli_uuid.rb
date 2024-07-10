@@ -42,9 +42,9 @@ module Discourse
 
         def handle_front_matter(file)
           front_matter, markdown = parse_file(file)
-          return if front_matter[@file_id_key]
+          return if front_matter[@note_uuid_key]
 
-          front_matter[@file_id_key] = SecureRandom.uuid
+          front_matter[@note_uuid_key] = SecureRandom.uuid
 
           properties = ''
           front_matter.each do |key, value|
