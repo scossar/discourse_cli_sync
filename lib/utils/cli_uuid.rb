@@ -19,19 +19,21 @@ module Discourse
 
         def ensure_cli_uuid
           CLI::UI::Frame
-            .open("Ensuring the cli_uuid exists for all files in #{@vault_directory}") do
-            confirm = CLI::UI::Prompt.confirm('The following operation will make changes to ' \
-                                              "#{@vault_directory}. Do you want to continue?")
-            raise Discourse::Error::BaseError, 'Exiting now' unless confirm
+            .open("Ensuring the cli_uuid exists for all files in {{blue:#{@vault_directory}}}") do
+            confirm = CLI::UI::Prompt
+                      .confirm('The following operation will make changes to ' \
+                               "{{blue:#{@vault_directory}}}. Do you want to continue?")
+            raise Discourse::Errors::BaseError, 'Exiting now' unless confirm
 
             spin_group = CLI::UI::SpinGroup.new
             spin_group.failure_debrief do |_title, exception|
               puts CLI::UI.fmt "  #{exception}"
             end
             directory_files.each do |file|
-              spin_group.add("Checking cli_uuid for #{file}") do |spinner|
+              file_name = File.basename(file)
+              spin_group.add("Checking cli_uuid for #{file_name}") do |spinner|
                 handle_front_matter(file)
-                spinner.update_title("cli_uuid set for #{file}")
+                spinner.update_title("cli_uuid set for {{green:#{file_name}}}")
               end
               spin_group.wait
             end
