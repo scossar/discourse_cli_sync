@@ -13,33 +13,40 @@ module Discourse
     validates :directory, presence: true
     validates :discourse_site, presence: true
 
-    def self.create_or_update(note_args)
-      title = note_args[:title]
-      local_only = note_args[:local_only] || false
-      topic_url = note_args[:topic_url]
-      topic_id = note_args[:topic_id]
-      post_id = note_args[:post_id]
-      discourse_site = note_args[:discourse_site]
-      directory = note_args[:directory]
-      file_id = note_args[:file_id]
-      discourse_site = note_args[:discourse_site]
-      file_id = note_args[:file_id]
+    def self.create(params)
+      title = params[:title]
+      local_only = params[:local_only] || false
+      topic_url = params[:topic_url]
+      topic_id = params[:topic_id]
+      post_id = params[:post_id]
+      discourse_site = params[:discourse_site]
+      directory = params[:directory]
+      file_id = params[:file_id]
 
-      note = Note.find_by(discourse_site:, file_id:)
-
-      if note
-        Note.update(title:, local_only:, topic_url:, topic_id:, post_id:, discourse_site:,
-                    directory:, file_id:).tap do |response|
-          raise Discourse::Errors::BaseError, 'unable to update note' unless response
-        end
-      else
-        Note.create(title:, local_only:, topic_url:, topic_id:, post_id:, discourse_site:,
-                    file_id:).tap do |note|
-          raise Discourse::Errors::BaseError, 'unable to create note' unless note.persisted?
-        end
+      Note.create(title:, local_only:, topic_url:, topic_id:, post_id:, discourse_site:,
+                  directory:, file_id:).tap do |result|
+        raise Discourse::Errors::BaseError, 'Unable to create Note' unless result.persisted?
       end
     rescue StandardError => e
-      raise Discourse::Errors::BaseError, "Error saving Note: #{e.message}"
+      raise Discourse::Errors::BaseError, "Error creating Note: #{e.message}"
+    end
+
+    def self.update(note, params = {})
+      title = params[:title]
+      local_only = params[:local_only] || false
+      topic_url = params[:topic_url]
+      topic_id = params[:topic_id]
+      post_id = params[:post_id]
+      discourse_site = params[:discourse_site]
+      directory = params[:directory]
+      file_id = params[:file_id]
+
+      note.update(title:, local_only:, topic_url:, topic_id:, post_id:, discourse_site:,
+                  directory:, file_id:).tap do |result|
+        raise Discourse::Errors::BaseError, 'Error updating Note' unless result
+      end
+    rescue StandardError => e
+      rails Discourse::Errors::BaseError, "Error updating Note: #{e.message}"
     end
   end
 end

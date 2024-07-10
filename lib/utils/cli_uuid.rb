@@ -55,17 +55,26 @@ module Discourse
               puts CLI::UI.fmt "  {{red:#{exception}}}"
             end
             @directory_files.each do |file|
-              file_name = File.basename(file)
-              spin_group.add("Creating or updating entry for #{file_name}") do |spinner|
-                front_matter, _markdown = parse_file(file)
-                cli_uuid = front_matter[@note_uuid_key]
-                title = File.basename(file, '.md')
-                directory_path = File.dirname(file)
-                directory = Discourse::Directory.find_by(path: directory_path,
-                                                         discourse_site: @discourse_site)
-                Discourse::Note.create_or_update(discourse_site: @discourse_site, directory:,
-                                                 file_id: cli_uuid, title:)
-                spinner.update_title("Note saved for #{file_name}")
+              front_matter, _markdown = parse_file(file)
+              cli_uuid = front_matter[@note_uuid_key]
+              title = File.basename(file, '.md')
+              directory_path = File.dirname(file)
+              directory = Discourse::Directory.find_by(path: directory_path,
+                                                       discourse_site: @discourse_site)
+              note = Discourse::Note.find_by(file_id: cli_uuid, discourse_site: @discourse_site)
+              spin_group_title = if note
+                                   "Updating entry for {{green:#{title}}}"
+                                 else
+                                   "Creating entry for {{green:#{title}}}"
+                                 end
+
+              spin_group.add(spin_group_title) do
+                if note
+                  Discourse::Note.update_note(note, title:, directory:)
+                else
+                  Discourse::Note.create_note(title:, discourse_site: @discourse_site, directory:,
+                                              file_id: cli_uuid)
+                end
               end
               spin_group.wait
             end
