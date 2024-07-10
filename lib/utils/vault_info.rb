@@ -41,10 +41,15 @@ module Discourse
 
         def all_directories
           vault_directory = @discourse_site.vault_directory
-          expanded_dir = File.expand_path(vault_directory)
-          expanded_dir = File.join(expanded_dir, '/')
-          subdirs = Dir.glob(File.join(expanded_dir, '**', '*/'))
-          subdirs << expanded_dir
+          root_dir = File.expand_path(vault_directory)
+          dirs = Dir.glob(File.join(root_dir, '**', '*/')).map do |dir|
+            normalize_path(dir)
+          end
+          dirs << normalize_path(root_dir)
+        end
+
+        def normalize_path(path)
+          path.chomp('/')
         end
       end
     end

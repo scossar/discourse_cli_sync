@@ -5,6 +5,7 @@ require 'front_matter_parser'
 require 'securerandom'
 
 require_relative '../errors/errors'
+require_relative '../models/directory'
 
 module Discourse
   module Utils
@@ -14,8 +15,12 @@ module Discourse
           @discourse_site = discourse_site
           @vault_directory = @discourse_site.vault_directory
           @note_uuid_key = 'cli_uuid'
+          @directory_files = directory_files
           ensure_cli_uuid
+          update_notes
         end
+
+        private
 
         def ensure_cli_uuid
           CLI::UI::Frame
@@ -29,7 +34,7 @@ module Discourse
             spin_group.failure_debrief do |_title, exception|
               puts CLI::UI.fmt "  #{exception}"
             end
-            directory_files.each do |file|
+            @directory_files.each do |file|
               file_name = File.basename(file)
               spin_group.add("Checking cli_uuid for #{file_name}") do |spinner|
                 handle_front_matter(file)
@@ -39,6 +44,8 @@ module Discourse
             end
           end
         end
+
+        def update_notes; end
 
         def handle_front_matter(file)
           front_matter, markdown = parse_file(file)
