@@ -10,7 +10,7 @@ module Discourse
   module Utils
     class CliUuid
       class << self
-        def call(discourse_site)
+        def call(discourse_site:)
           @discourse_site = discourse_site
           @vault_directory = @discourse_site.vault_directory
           @note_uuid_key = 'cli_uuid'
@@ -20,6 +20,10 @@ module Discourse
         def ensure_cli_uuid
           CLI::UI::Frame
             .open("Ensuring the cli_uuid exists for all files in #{@vault_directory}") do
+            confirm = CLI::UI::Prompt.confirm('The following operation will make changes to ' \
+                                              "#{@vault_directory}. Do you want to continue?")
+            raise Discourse::Error::BaseError, 'Exiting now' unless confirm
+
             spin_group = CLI::UI::SpinGroup.new
             spin_group.failure_debrief do |_title, exception|
               puts CLI::UI.fmt "  #{exception}"
