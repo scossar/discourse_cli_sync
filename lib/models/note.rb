@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative '../errors/errors'
+require_relative '../utils/logger'
 
 module Discourse
   class Note < ActiveRecord::Base
@@ -25,6 +26,9 @@ module Discourse
       file_id = note_args[:file_id]
       discourse_site = note_args[:discourse_site]
       file_id = note_args[:file_id]
+
+      Discourse::Utils::Logger.debug("title: #{title}, local_only: #{local_only}, topic_url: #{topic_url}, topic_id: #{topic_id}" \
+                                     "post_id: #{post_id}, discourse_site_domain: #{discourse_site&.domain}, directory_path: #{directory&.path}, file_id: #{file_id}")
 
       note = Note.find_by(discourse_site:, file_id:)
 

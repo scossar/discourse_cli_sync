@@ -59,7 +59,10 @@ module Discourse
                 front_matter, _markdown = parse_file(file)
                 cli_uuid = front_matter[@note_uuid_key]
                 title = File.basename(file, '.md')
-                Discourse::Note.create_or_update(discourse_site: @discourse_site,
+                directory_path = File.dirname(file)
+                directory = Discourse::Directory.find_by(path: directory_path,
+                                                         discourse_site: @discourse_site)
+                Discourse::Note.create_or_update(discourse_site: @discourse_site, directory:,
                                                  file_id: cli_uuid, title:)
                 spinner.update_title("Note saved for #{file_name}")
               end
