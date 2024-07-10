@@ -50,8 +50,9 @@ module Discourse
         def update_notes
           CLI::UI::Frame.open("Updating note entries for #{@vault_directory}") do
             spin_group = CLI::UI::SpinGroup.new
-            spin_group.failure_debrief do |_title, exception|
-              puts CLI::UI.fmt "  #{exception}"
+            spin_group.failure_debrief do |title, exception|
+              puts CLI::UI.fmt "  #{title}"
+              puts CLI::UI.fmt "  {{red:#{exception}}}"
             end
             @directory_files.each do |file|
               file_name = File.basename(file)
