@@ -12,6 +12,7 @@ module Discourse
     end
 
     register :PublishDirectory, 'publish_directory', 'discourse/commands/publish_directory'
+    register :SyncFiles, 'sync_files', 'discourse/commands/sync_files'
     register :Help, 'help', 'discourse/commands/help'
   end
 end

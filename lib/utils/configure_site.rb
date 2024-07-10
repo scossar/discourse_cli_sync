@@ -95,6 +95,7 @@ module Discourse
         end
 
         def configure_vault_directory(domain)
+          # TODO: add validation. The path should end with a trailing slash
           vault_directory = nil
           loop do
             vault_directory = CLI::UI::Prompt.ask("Vault directory for {{blue:#{domain}}}")
