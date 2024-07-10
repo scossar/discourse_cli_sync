@@ -19,7 +19,6 @@ module Discourse
           @directories = Discourse::Directory.where(discourse_site: @discourse_site)
           @directory_files = directory_files
           ensure_cli_uuid
-          update_notes
         end
 
         private
@@ -41,40 +40,6 @@ module Discourse
               spin_group.add("Checking cli_uuid for #{file_name}") do |spinner|
                 handle_front_matter(file)
                 spinner.update_title("cli_uuid set for {{green:#{file_name}}}")
-              end
-              spin_group.wait
-            end
-          end
-        end
-
-        def update_notes
-          CLI::UI::Frame.open("Updating note entries for #{@vault_directory}") do
-            spin_group = CLI::UI::SpinGroup.new
-            spin_group.failure_debrief do |title, exception|
-              puts CLI::UI.fmt "  #{title}"
-              puts CLI::UI.fmt "  {{red:#{exception}}}"
-            end
-            @directory_files.each do |file|
-              front_matter, _markdown = parse_file(file)
-              cli_uuid = front_matter[@note_uuid_key]
-              title = File.basename(file, '.md')
-              directory_path = File.dirname(file)
-              directory = Discourse::Directory.find_by(path: directory_path,
-                                                       discourse_site: @discourse_site)
-              note = Discourse::Note.find_by(file_id: cli_uuid, discourse_site: @discourse_site)
-              spin_group_title = if note
-                                   "Updating entry for {{green:#{title}}}"
-                                 else
-                                   "Creating entry for {{green:#{title}}}"
-                                 end
-
-              spin_group.add(spin_group_title) do
-                if note
-                  Discourse::Note.update_note(note, title:, directory:)
-                else
-                  Discourse::Note.create_note(title:, discourse_site: @discourse_site, directory:,
-                                              file_id: cli_uuid)
-                end
               end
               spin_group.wait
             end

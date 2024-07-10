@@ -7,6 +7,7 @@ require_relative '../../utils/info_frames'
 require_relative '../../utils/directory_publisher_frame'
 require_relative '../../utils/site_tag_frame'
 require_relative '../../utils/cli_uuid'
+require_relative '../../utils/notes_frame'
 
 module Discourse
   module Commands
@@ -15,6 +16,7 @@ module Discourse
         discourse_site, api_key = Discourse::Utils::CredentialFrame.call
         Discourse::Utils::InfoFrames.call(discourse_site:, api_key:)
         Discourse::Utils::CliUuid.call(discourse_site:)
+        Discourse::Utils::NotesFrame.call(discourse_site:)
         Discourse::Utils::SiteTagFrame.call(discourse_site:, api_key:)
         root_directory, use_subdirectories = Discourse::Utils::DirectorySelectorFrame
                                              .call(discourse_site:)
