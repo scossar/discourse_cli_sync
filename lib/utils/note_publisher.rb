@@ -169,19 +169,23 @@ module Discourse
         end
 
         def update_topic(spin_group, discourse_topic)
-          # catch notes that have been moved to directories with different categories
+          # only catch notes that have been moved to directories with different categories
           return if discourse_topic.discourse_category == @directory.discourse_category
 
           spin_group.add("Recategorizing {{green:#{@note.title}}}") do |spinner|
-            @publisher.update_topic(discourse_topic.topic_id,
-                                    { category_id: @directory.discourse_category.discourse_id })
-            @note.update(directory: @directory).tap do |note|
-              raise Discourse::Errors::BaseError, 'Note entry could not be updated' unless note
-            end
+            recategorize_topic(discourse_topic)
             spinner.update_title("{{green:#{@note.title}}} recategorized to " \
                                  "#{@directory.discourse_category.name}")
           end
           spin_group.wait
+        end
+
+        def recategorize_topic(discourse_topic)
+          @publisher.update_topic(discourse_topic.topic_id,
+                                  { category_id: @directory.discourse_category.discourse_id })
+          discourse_topic.update(discourse_category: @directory.discourse_category).tap do |topic|
+            raise Discourse::Errors::BaseError, 'Note entry could not be updated' unless topic
+          end
         end
 
         def create_topic(spin_group)
