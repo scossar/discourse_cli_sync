@@ -45,9 +45,9 @@ module Discourse
 
           spin_group.add(group_title) do
             if note
-              Discourse::Note.update_note(note, title:, directory:)
+              Discourse::Note.update_note(note, title:, directory:, full_path: file)
             else
-              Discourse::Note.create_note(title:, file_id: cli_uuid, directory:,
+              Discourse::Note.create_note(title:, file_id: cli_uuid, directory:, full_path: file,
                                           discourse_site: @discourse_site)
             end
           end
