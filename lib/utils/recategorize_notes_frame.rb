@@ -19,6 +19,8 @@ module Discourse
 
         def recategorize_topics
           topics = Discourse::DiscourseTopic.where(directory: @directory)
+          return if topics.empty?
+
           category = @directory.discourse_category
           CLI::UI::Frame.open("Moving #{topics.count} topics to #{category.name}") do
             topics_task(topics, category)

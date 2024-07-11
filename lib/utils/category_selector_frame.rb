@@ -41,13 +41,15 @@ module Discourse
         def handle_configured_category(dir:, configured_category:)
           short_path = Discourse::Utils::Ui.fancy_path(dir.path)
           keep_configuration = CLI::UI::Prompt
-                               .confirm("#{short_path} has been configured to publish notes " \
-                                        "to #{configured_category.name}. Keep that configuration?")
+                               .confirm("{{blue:#{short_path}}} has been configured to publish " \
+                                        "notes to #{configured_category.name}. " \
+                                        'Keep that configuration?')
 
           return if keep_configuration
 
           confirm = CLI::UI::Prompt
-                    .confirm("Confirm that you want to change the category for #{short_path}")
+                    .confirm('Confirm that you want to change the category for ' \
+                             "{{blue:#{short_path}}}")
           return unless confirm
 
           configure_category(dir)
@@ -61,7 +63,7 @@ module Discourse
           category_name = nil
           short_path = Discourse::Utils::Ui.fancy_path(dir.path)
           loop do
-            category_name = CLI::UI::Prompt.ask("Category for #{short_path}",
+            category_name = CLI::UI::Prompt.ask("Category for {{blue:#{short_path}}}",
                                                 options: category_names)
             confirm = CLI::UI::Prompt.confirm("Is #{category_name} correct?")
             break if confirm
