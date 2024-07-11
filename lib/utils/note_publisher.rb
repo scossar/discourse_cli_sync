@@ -66,7 +66,7 @@ module Discourse
 
             return local_only_spinner(spin_group, false)
           else
-            local_only = CLI::UI::Prompt.confirm("Set {green:#{@title}}} to local only?")
+            local_only = CLI::UI::Prompt.confirm("Set {{green:#{@title}}} to local only?")
             return local_only_spinner(spin_group, true) if local_only
           end
           :not_local
