@@ -70,7 +70,7 @@ module Discourse
         end
 
         def directory_tags(tags_str)
-          dir.update(tags: tags_str).tap do |response|
+          @directory.update(tags: tags_str).tap do |response|
             unless response
               raise Discourse::Errors::BaseError,
                     "Unable to update directory for tags: #{tags_str}"
