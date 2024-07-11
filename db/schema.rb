@@ -10,13 +10,14 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_11_044525) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_11_061454) do
   create_table "directories", force: :cascade do |t|
     t.string "path", null: false
     t.integer "discourse_site_id"
     t.integer "discourse_category_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.text "tags"
     t.index ["discourse_category_id"], name: "index_directories_on_discourse_category_id"
     t.index ["discourse_site_id", "path"], name: "index_directories_on_discourse_site_id_and_path", unique: true
     t.index ["discourse_site_id"], name: "index_directories_on_discourse_site_id"
