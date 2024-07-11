@@ -6,6 +6,7 @@ require_relative 'attachment_handler'
 require_relative '../errors/errors'
 require_relative 'internal_link_handler'
 require_relative 'discourse_request'
+require_relative '../models/discourse_topic'
 
 module Discourse
   module Services
@@ -16,7 +17,7 @@ module Discourse
         @directory = @note.directory
         @api_key = api_key
         @discourse_site = @note.discourse_site
-        @client = DiscourseRequest.new(discourse_site, api_key)
+        @client = DiscourseRequest.new(@discourse_site, api_key)
       end
 
       def parse_file
@@ -51,22 +52,25 @@ module Discourse
             raise Discourse::Errors::BaseError,
                   "Failed to create topic for #{title}"
           end
-          post_id = create_note_entry(title, response)
+          create_discourse_topic_entry(response)
         end
       end
 
-      def create_note_entry(title, post_data)
+      def create_discourse_topic_entry(post_data)
         topic_url = url_from_post_data(post_data)
         topic_id = post_data['topic_id']
         post_id = post_data['id']
-        Note.create(title:, topic_url:, topic_id:, post_id:, directory: @directory,
-                    discourse_site: @discourse_site).tap do |note|
-          raise Discourse::Errors::BaseError, 'Note could not be created' unless note.persisted?
+        Discourse::DiscourseTopic.create(note: @note, topic_url:, topic_id:, post_id:,
+                                         directory: @directory,
+                                         discourse_site: @discourse_site).tap do |topic|
+          unless topic.persisted?
+            raise Discourse::Errors::BaseError,
+                  'DiscourseTopic entry could not be created'
+          end
         end
-        post_id
       rescue StandardError => e
         raise Discourse::Errors::BaseError,
-              "Error creating Note for post_id #{post_id}: #{e.message}"
+              "Error creating DiscourseTopic for post_id #{post_id}: #{e.message}"
       end
 
       def url_from_post_data(post_data)
