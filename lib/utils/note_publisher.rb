@@ -52,7 +52,7 @@ module Discourse
           return if skip
 
           attachments_task(spin_group)
-          # internal_links_task(spin_group)
+          internal_links_task(spin_group)
           # publish_task(spin_group)
         end
 

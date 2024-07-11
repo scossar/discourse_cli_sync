@@ -3,14 +3,16 @@
 require_relative 'discourse_request'
 require_relative '../errors/errors'
 require_relative '../models/note'
+require_relative '../utils/logger'
 
 module Discourse
   module Services
     class InternalLinkHandler
-      def initialize(api_key:, discourse_site:, directory:, markdown:)
+      def initialize(api_key:, note:, markdown:)
         @api_key = api_key
-        @discourse_site = discourse_site
-        @directory = directory
+        @note = note
+        @discourse_site = @note.discourse_site
+        @directory = @note.directory
         @markdown = markdown
         @base_url = @discourse_site.base_url
         @internal_link_regex = /(?<!!)\[\[(.*?)\]\]/
@@ -19,16 +21,13 @@ module Discourse
       def handle
         internal_links = []
         link_adjusted = @markdown.gsub(@internal_link_regex) do |link_match|
-          title = link_match.match(@internal_link_regex)[1]
-          internal_links << title
-          linked_note = Note.find_by(title:, directory: @directory)
-          topic_url = linked_note&.topic_url
-          topic_url ||= if linked_note&.local_only
-                          local_only_placeholder_topic(title, linked_note)
-                        else
-                          placeholder_topic(title)
-                        end
-          new_link = "[#{title}](#{topic_url})"
+          link_text = link_match.match(@internal_link_regex)[1]
+          linked_note = find_linked_note(link_text)
+          break unless linked_note
+
+          topic_url = linked_note_topic_url(linked_note)
+          internal_links << linked_note.title
+          new_link = "[#{linked_note.title}](#{topic_url})"
           new_link
         rescue StandardError => e
           raise Discourse::Errors::BaseError,
@@ -39,17 +38,42 @@ module Discourse
 
       private
 
-      def local_only_placeholder_topic(title, linked_note)
-        markdown = "This is a placeholder topic for the local only note _#{title}_."
-        post_data = create_discourse_topic(title, markdown)
-        update_note_entry(post_data, linked_note)
+      def find_linked_note(link_text)
+        relative_path, title = parse_link(link_text)
+        note = if relative_path
+                 find_note_by_path(relative_path, title)
+               else
+                 # TODO: add a unique constraint to Notes for discourse_site_id/title
+                 Discourse::Note.find_by(title:)
+               end
+        Discourse::Utils::Logger.debug("note: #{note}")
+        note
       end
 
-      def placeholder_topic(title)
+      def linked_note_topic_url(linked_note)
+        linked_note_topic = Discourse::DiscourseTopic.find_by(note: linked_note)
+        topic_url = linked_note_topic&.topic_url
+        topic_url || placeholder_topic(linked_note)
+      end
+
+      def placeholder_topic(note)
+        title = note.title
         markdown = "This is a placeholder topic for _#{title}_."
         post_data = create_discourse_topic(title, markdown)
-        note = create_note_entry(title, post_data)
-        note.topic_url
+        create_discourse_topic_entry(note, post_data)
+      end
+
+      def parse_link(link_text)
+        components = link_text.split('|')
+        title = components.pop
+        relative_path = components.empty? ? nil : components.join
+        [relative_path, title]
+      end
+
+      def find_note_by_path(relative_path, title)
+        root_dir = File.expand_path(@discourse_site.vault_directory)
+        full_path = File.join(root_dir, relative_path, "#{title}.md")
+        Discourse::Note.find_by(full_path:)
       end
 
       def create_discourse_topic(title, markdown)
@@ -63,31 +87,21 @@ module Discourse
         end
       end
 
-      def create_note_entry(title, post_data)
+      def create_discourse_topic_entry(note, post_data)
         topic_url = url_from_post_data(post_data)
         topic_id = post_data['topic_id']
         post_id = post_data['id']
-        Note.create(title:, topic_url:, topic_id:, post_id:,
-                    directory: @directory,
-                    discourse_site: @discourse_site).tap do |note|
-          raise Discourse::Errors::BaseError, 'Note could not be created' unless note.persisted?
-        end
-      rescue StandardError => e
-        raise Discourse::Errors::BaseError, "Error creating Note: #{e.message}"
-      end
-
-      def update_note_entry(post_data, note)
-        topic_url = url_from_post_data(post_data)
-        topic_id = post_data['topic_id']
-        post_id = post_data['id']
-        note.update(topic_url:, topic_id:, post_id:).tap do |updated_note|
-          unless updated_note
-            raise Discourse::Errors::BaseError, 'Note entry for linked note could not be updated'
+        Discourse::DiscourseTopic.create(note:, topic_url:, topic_id:, post_id:,
+                                         directory: @directory,
+                                         discourse_site: @discourse_site).tap do |topic|
+          unless topic.persisted?
+            raise Discourse::Errors::BaseError,
+                  'DiscourseTopic could not be created'
           end
         end
         topic_url
       rescue StandardError => e
-        raise Discourse::Errors::BaseError, "Error updating linked Note entry: #{e.message}"
+        raise Discourse::Errors::BaseError, "Error creating DiscourseTopic: #{e.message}"
       end
 
       def url_from_post_data(post_data)
