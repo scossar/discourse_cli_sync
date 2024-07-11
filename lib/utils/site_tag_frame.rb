@@ -30,7 +30,7 @@ module Discourse
         def confirm_site_tag(site_tag)
           keep_site_tag = CLI::UI::Prompt
                           .confirm("All notes published to {{blue:#{@discourse_site.domain}}} " \
-                                   "will be tagged with '#{site_tag}'. Keep configuration?")
+                                   "will be tagged with {{bold:#{site_tag}}}. Keep configuration?")
           return if keep_site_tag
 
           confirm = CLI::UI::Prompt
@@ -52,7 +52,7 @@ module Discourse
             valid_tag = @tag_regex.match(tag) || tag.empty?
             unless valid_tag
               tag = CLI::UI::Prompt
-                    .ask("'#{tag}' is not valid. Please try again")
+                    .ask("{{bold:#{tag}}} is not valid. Please try again")
             end
 
             confirm = CLI::UI::Prompt.confirm(tag_confirm_prompt(tag))
@@ -67,7 +67,7 @@ module Discourse
           return unless published_notes.any?
 
           update_topics = CLI::UI::Prompt
-                          .confirm("Add #{@discourse_site.site_tag} to existing topics?")
+                          .confirm("Add {{bold:#{@discourse_site.site_tag}}} to existing topics?")
 
           return unless update_topics
 
@@ -78,7 +78,7 @@ module Discourse
           if tag.empty?
             "Confirm that no tag should be added to notes published from #{@discourse_site.domain}"
           else
-            "Is '#{tag}' correct?"
+            "Is {{bold:#{tag}}} correct?"
           end
         end
       end
