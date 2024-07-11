@@ -24,12 +24,16 @@ module Discourse
         def selector_frame(use_subdirectories)
           path = @directory.path
           directories = use_subdirectories ? sub_directories(path) : [@directory]
-          CLI::UI::Frame.open(category_frame_title(path, directories.length)) do
-            directories.each do |dir|
-              category_for_directory(dir)
-              tags_for_directory(dir)
-            end
+          directories.each do |directory|
+            Discourse::Utils::CategorySelectorFrame.call(directory:, categories: @categories,
+                                                         api_key: @api_key)
           end
+          # CLI::UI::Frame.open(category_frame_title(path, directories.length)) do
+          #   directories.each do |dir|
+          #     category_for_directory(dir)
+          #     tags_for_directory(dir)
+          #   end
+          # end
           directories
         end
 

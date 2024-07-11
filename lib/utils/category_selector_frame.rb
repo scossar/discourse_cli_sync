@@ -49,7 +49,7 @@ module Discourse
 
           # TODO: The args for RecategorizeNotexFrame could be simplified
           Discourse::Utils::RecategorizeNotesFrame.call(directory: @directory,
-                                                        discourse_site: dir.discourse_site,
+                                                        discourse_site: @directory.discourse_site,
                                                         api_key: @api_key)
         end
 
