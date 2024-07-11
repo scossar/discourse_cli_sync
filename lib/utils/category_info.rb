@@ -97,9 +97,7 @@ module Discourse
           end
           spin_group.wait
 
-          Discourse::Utils::RecategorizeNotesFrame.call(directory:,
-                                                        discourse_site: @discourse_site,
-                                                        api_key: @api_key)
+          Discourse::Utils::RecategorizeNotesFrame.call(directory:, api_key: @api_key)
 
           handle_delete_category(spin_group:, deleted_category: discourse_category)
         end

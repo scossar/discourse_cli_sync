@@ -69,9 +69,7 @@ module Discourse
 
           configure_category(dir)
 
-          Discourse::Utils::RecategorizeNotesFrame.call(directory: dir,
-                                                        discourse_site: @discourse_site,
-                                                        api_key: @api_key)
+          Discourse::Utils::RecategorizeNotesFrame.call(directory: dir, api_key: @api_key)
         end
 
         def configure_category(dir)

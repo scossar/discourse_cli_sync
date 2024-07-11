@@ -7,9 +7,9 @@ module Discourse
   module Utils
     class RecategorizeNotesFrame
       class << self
-        def call(directory:, discourse_site:, api_key:)
+        def call(directory:, api_key:)
           @directory = directory
-          @discourse_site = discourse_site
+          @discourse_site = @directory.discourse_site
           @api_key = api_key
           @client = Discourse::DiscourseRequest.new(@discourse_site, @api_key)
           recategorize_topics

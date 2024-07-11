@@ -47,10 +47,7 @@ module Discourse
 
           configure_category(short_path)
 
-          # TODO: The args for RecategorizeNotexFrame could be simplified
-          Discourse::Utils::RecategorizeNotesFrame.call(directory: @directory,
-                                                        discourse_site: @directory.discourse_site,
-                                                        api_key: @api_key)
+          Discourse::Utils::RecategorizeNotesFrame.call(directory: @directory, api_key: @api_key)
         end
 
         def configure_category(short_path)
