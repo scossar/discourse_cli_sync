@@ -10,25 +10,17 @@ module Discourse
   module Utils
     class NotePublisher
       class << self
-        def call(note_path:, directory:, api_key:, discourse_site:, require_confirmation: false)
-          @discourse_site = discourse_site
-          @publisher = Discourse::Services::Publisher.new(note_path:, directory:, api_key:,
-                                                          discourse_site: @discourse_site)
-          @title, @front_matter, @markdown = @publisher.parse_file
-          @directory = directory
-          @note = find_note(@front_matter)
+        def call(note:, api_key:, require_confirmation: false)
+          @note = note
+          @discourse_site = @note.discourse_site
+          @directory = @note.directory
+
+          @publisher = Discourse::Services::Publisher.new(note:, api_key:)
+          @title, _front_matter, @markdown = @publisher.parse_file
           publishing_frame(require_confirmation)
         end
 
         private
-
-        def find_note(front_matter)
-          key = "#{@discourse_site.domain}_id"
-          post_id = front_matter[key].to_i
-          return nil unless post_id
-
-          Discourse::Note.find_by(post_id:)
-        end
 
         def publishing_frame(require_confirmation)
           spin_group = CLI::UI::SpinGroup.new
@@ -67,7 +59,8 @@ module Discourse
         def confirm_local_status(spin_group)
           if @note&.local_only
             keep_local_status = CLI::UI::Prompt
-                                .confirm("{{green:#{@title}}} is set to local only. Keep that status?")
+                                .confirm("{{green:#{@title}}} is set to local only. " \
+                                         'Keep that status?')
             return :local_only if keep_local_status
 
             return local_only_spinner(spin_group, false)
@@ -86,26 +79,23 @@ module Discourse
                           end
 
           spin_group.add(spinner_title) do
-            configure_local_status(local_only)
+            configure_local_only(local_only)
             sleep 0.25
           end
           spin_group.wait
           local_only ? :local_only : :not_local
         end
 
-        def configure_local_status(local_only)
-          if @note
-            unless @note.update(local_only:)
-              raise Discourse::Errors::BaseError, 'Note could not be updated'
+        def configure_local_only(local_only)
+          @note.update(local_only:).tap do |response|
+            unless response
+              raise Discourse::Errors::BaseError,
+                    "Note's local_only status could not be updated"
             end
-          else
-            note = Discourse::Note.create(title: @title, directory: @directory, local_only:,
-                                          discourse_site: @discourse_site)
-            raise Discourse::Errors::BaseError, 'Note could not be created' unless note.persisted?
           end
         rescue StandardError => e
           raise Discourse::Errors::BaseError,
-                "Error creating or updating Note record: #{e.message}"
+                "Error updating local_only status for Note: #{e.message}"
         end
 
         def confirm_publish_status(spin_group)
@@ -185,15 +175,15 @@ module Discourse
             @note.update(directory: @directory).tap do |note|
               raise Discourse::Errors::BaseError, 'Note entry could not be updated' unless note
             end
-            spinner
-              .update_title("{{green:#{@note.title}}} recategorized to #{@directory.discourse_category.name}")
+            spinner.update_title("{{green:#{@note.title}}} recategorized to " \
+                                 "#{@directory.discourse_category.name}")
           end
           spin_group.wait
         end
 
         def create_topic(spin_group)
           spin_group.add("Creating new topic for #{@title}") do |spinner|
-            @publisher.create_topic(@title, @markdown, @front_matter)
+            @publisher.create_topic(@title, @markdown)
             spinner.update_title("Topic created for {{green:#{@title}}}")
           end
           spin_group.wait

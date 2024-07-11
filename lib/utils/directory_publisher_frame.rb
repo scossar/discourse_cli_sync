@@ -25,16 +25,11 @@ module Discourse
           end
         end
 
-        def publish_directory(directory, _require_confirmation)
-          paths = notes_for_directory(directory)
-          puts paths
+        def publish_directory(directory, require_confirmation)
+          notes = notes_for_directory(directory)
 
-          paths.each do |note_path|
-            Discourse::Utils::NotePublisher.call(note_path:,
-                                                 directory:,
-                                                 api_key: @api_key,
-                                                 discourse_site: @discourse_site,
-                                                 require_confirmation:)
+          notes.each do |note|
+            Discourse::Utils::NotePublisher.call(note:, api_key: @api_key, require_confirmation:)
           end
         end
 
@@ -43,8 +38,7 @@ module Discourse
         end
 
         def notes_for_directory(directory)
-          # Dir.glob(File.join(directory.path, '*.md'))
-          Discourse::Note.where(directory:).pluck(:full_path)
+          Discourse::Note.where(directory:)
         end
 
         def short_path(directory)

@@ -10,11 +10,12 @@ require_relative 'discourse_request'
 module Discourse
   module Services
     class Publisher
-      def initialize(note_path:, directory:, api_key:, discourse_site:)
-        @note_path = note_path
-        @directory = directory
+      def initialize(note:, api_key:)
+        @note = note
+        @note_path = @note.full_path
+        @directory = @note.directory
         @api_key = api_key
-        @discourse_site = discourse_site
+        @discourse_site = @note.discourse_site
         @client = DiscourseRequest.new(discourse_site, api_key)
       end
 
@@ -42,7 +43,7 @@ module Discourse
         internal_link_handler.handle
       end
 
-      def create_topic(title, markdown, front_matter)
+      def create_topic(title, markdown)
         @client.create_topic(title:, markdown:,
                              category: @directory.discourse_category.discourse_id,
                              tags: [@discourse_site.site_tag]).tap do |response|
@@ -51,22 +52,7 @@ module Discourse
                   "Failed to create topic for #{title}"
           end
           post_id = create_note_entry(title, response)
-          update_front_matter(post_id, front_matter, markdown)
         end
-      end
-
-      def update_front_matter(post_id, front_matter, markdown)
-        post_id_key = "#{@discourse_site.domain}_id"
-        front_matter[post_id_key] = post_id.to_s
-        properties = ''
-        front_matter.each do |key, value|
-          properties += "\n#{key}: #{value}"
-        end
-        properties = "---\n#{properties}\n---\n"
-
-        updated_file = "#{properties}\n#{markdown}"
-
-        File.write(@note_path, updated_file)
       end
 
       def create_note_entry(title, post_data)
