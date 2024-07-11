@@ -74,6 +74,7 @@ module Discourse
         end
 
         def sub_directories(path)
+          # I guess this works, but...
           Discourse::Directory.where('path LIKE ?',
                                      "#{path}%").where(discourse_site: @discourse_site)
         end

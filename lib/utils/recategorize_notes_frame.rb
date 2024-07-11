@@ -12,27 +12,28 @@ module Discourse
           @discourse_site = discourse_site
           @api_key = api_key
           @client = Discourse::DiscourseRequest.new(@discourse_site, @api_key)
-          recategorize_notes
+          recategorize_topics
         end
 
         private
 
-        def recategorize_notes
-          notes = Discourse::Note.where(directory: @directory)
+        def recategorize_topics
+          topics = Discourse::DiscourseTopic.where(directory: @directory)
           category = @directory.discourse_category
-          CLI::UI::Frame.open("Moving #{notes.count} notes to #{category.name}") do
-            topics_task(notes, category)
+          CLI::UI::Frame.open("Moving #{topics.count} topics to #{category.name}") do
+            topics_task(topics, category)
           end
         end
 
-        def topics_task(notes, category)
+        def topics_task(topics, category)
           spin_group = CLI::UI::SpinGroup.new
           spin_group.failure_debrief do |_title, exception|
             puts CLI::UI.fmt "  #{exception}"
           end
-          notes.each do |note|
+          topics.each do |topic|
+            note = topic.note
             title = note.title
-            topic_id = note.topic_id
+            topic_id = topic.topic_id
             spin_group.add("Moving #{title}") do |spinner|
               @client.update_topic(topic_id:,
                                    params: {

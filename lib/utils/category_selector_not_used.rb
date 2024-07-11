@@ -3,6 +3,8 @@
 require_relative 'ui_utils'
 require_relative '../models/discourse_category'
 
+# TODO: is this being used???
+
 module Discourse
   module Utils
     class CategorySelector
