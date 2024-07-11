@@ -38,14 +38,17 @@ module Discourse
           front_matter, _markdown = parse_file(file)
           cli_uuid = front_matter[@note_uuid_key]
           title = File.basename(file, '.md')
-          note = Discourse::Note.find_by(file_id: cli_uuid)
+          note = Discourse::Note.find_by(file_id: cli_uuid, discourse_site: @discourse_site)
+          file_path = File.dirname(file)
+          directory = @directories.find_by(path: file_path)
           group_title = spin_group_title(note, title)
 
           spin_group.add(group_title) do
             if note
-              Discourse::Note.update_note(note, title:)
+              Discourse::Note.update_note(note, title:, directory:)
             else
-              Discourse::Note.create_note(title:, file_id: cli_uuid)
+              Discourse::Note.create_note(title:, file_id: cli_uuid, directory:,
+                                          discourse_site: @discourse_site)
             end
           end
           spin_group.wait

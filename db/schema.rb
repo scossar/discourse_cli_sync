@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_10_214422) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_11_000645) do
   create_table "directories", force: :cascade do |t|
     t.string "path", null: false
     t.integer "discourse_site_id"
@@ -74,6 +74,10 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_10_214422) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "file_id"
+    t.integer "directory_id"
+    t.integer "discourse_site_id"
+    t.index ["directory_id"], name: "index_notes_on_directory_id"
+    t.index ["discourse_site_id"], name: "index_notes_on_discourse_site_id"
   end
 
   add_foreign_key "directories", "discourse_categories"
@@ -82,4 +86,6 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_10_214422) do
   add_foreign_key "discourse_topics", "directories"
   add_foreign_key "discourse_topics", "discourse_sites"
   add_foreign_key "discourse_topics", "notes"
+  add_foreign_key "notes", "directories"
+  add_foreign_key "notes", "discourse_sites"
 end
