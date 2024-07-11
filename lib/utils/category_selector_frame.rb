@@ -10,6 +10,7 @@ module Discourse
       class << self
         def call(directory:, categories:, api_key:)
           @directory = directory
+          @discourse_site = @directory.discourse_site
           @categories = categories
           @api_key = api_key
           category_selector_frame
@@ -20,20 +21,20 @@ module Discourse
         def category_selector_frame
           short_path = Discourse::Utils::Ui.fancy_path(@directory.path)
           CLI::UI::Frame.open("Category for {{blue:#{short_path}}}") do
-            category_for_directory(dir, short_path)
+            category_for_directory(short_path)
           end
         end
 
-        def category_for_directory(dir, short_path)
-          if dir.discourse_category
-            handle_configured_category(dir, short_path)
+        def category_for_directory(short_path)
+          if @directory.discourse_category
+            handle_configured_category(short_path)
           else
-            configure_category(dir, short_path)
+            configure_category(short_path)
           end
         end
 
-        def handle_configured_category(dir, short_path)
-          configured_category = dir.discourse_category.name
+        def handle_configured_category(short_path)
+          configured_category = @directory.discourse_category.name
           keep_configuration = CLI::UI::Prompt
                                .confirm("{{blue:#{short_path}}} has been configured to publish " \
                                         "notes to #{configured_category}. Keep this configuration?")
@@ -44,14 +45,15 @@ module Discourse
                              "#{configured_category}?")
           return unless confirm
 
-          configure_category(dir, short_path)
+          configure_category(short_path)
 
-          Discourse::Utils::RecategorizeNotesFrame.call(directory: dir,
+          # TODO: The args for RecategorizeNotexFrame could be simplified
+          Discourse::Utils::RecategorizeNotesFrame.call(directory: @directory,
                                                         discourse_site: dir.discourse_site,
                                                         api_key: @api_key)
         end
 
-        def configure_category(dir, short_path)
+        def configure_category(short_path)
           category_name = nil
           loop do
             category_name = CLI::UI::Prompt.ask("Category for {{blue:#{short_path}}}",
@@ -62,7 +64,7 @@ module Discourse
 
           category = Discourse::DiscourseCategory.find_by(name: category_name,
                                                           discourse_site: @discourse_site)
-          dir.update(discourse_category: category)
+          @directory.update(discourse_category: category)
         end
 
         def category_names
