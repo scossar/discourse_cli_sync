@@ -6,6 +6,7 @@ require_relative 'recategorize_notes_frame'
 require_relative 'ui_utils'
 # TODO: remove unused imports and use category_selector_frame and tag_selector_frame
 require_relative 'category_selector_frame'
+require_relative 'tag_selector_frame'
 
 module Discourse
   module Utils
@@ -27,6 +28,7 @@ module Discourse
           directories.each do |directory|
             Discourse::Utils::CategorySelectorFrame.call(directory:, categories: @categories,
                                                          api_key: @api_key)
+            Discourse::Utils::TagSelectorFrame.call(directory:, api_key: @api_key)
           end
           # CLI::UI::Frame.open(category_frame_title(path, directories.length)) do
           #   directories.each do |dir|
