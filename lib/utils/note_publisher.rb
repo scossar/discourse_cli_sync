@@ -4,6 +4,7 @@ require_relative '../errors/errors'
 require_relative 'ui_utils'
 require_relative '../services/publisher'
 require_relative '../models/note'
+require_relative '../models/discourse_topic'
 require_relative 'logger'
 
 module Discourse
@@ -53,7 +54,7 @@ module Discourse
 
           attachments_task(spin_group)
           internal_links_task(spin_group)
-          # publish_task(spin_group)
+          publish_task(spin_group)
         end
 
         def confirm_local_status(spin_group)
@@ -150,27 +151,29 @@ module Discourse
         end
 
         def publish_task(spin_group)
-          if @note
-            update_post(spin_group)
-            update_topic(spin_group)
+          discourse_topic = Discourse::DiscourseTopic.find_by(note: @note)
+          if discourse_topic
+            update_post(spin_group, discourse_topic)
+            update_topic(spin_group, discourse_topic)
           else
             create_topic(spin_group)
           end
         end
 
-        def update_post(spin_group)
+        def update_post(spin_group, discourse_topic)
           spin_group.add("Updating topic for {{green:#{@title}}}") do |spinner|
-            @publisher.update_post(@note, @markdown)
+            @publisher.update_post(@note, @markdown, discourse_topic)
             spinner.update_title("Topic updated for {{green:#{@title}}}")
           end
           spin_group.wait
         end
 
-        def update_topic(spin_group)
-          return if @note.directory == @directory
+        def update_topic(spin_group, discourse_topic)
+          # catch notes that have been moved to directories with different categories
+          return if discourse_topic.discourse_category == @directory.discourse_category
 
           spin_group.add("Recategorizing {{green:#{@note.title}}}") do |spinner|
-            @publisher.update_topic(@note.topic_id,
+            @publisher.update_topic(discourse_topic.topic_id,
                                     { category_id: @directory.discourse_category.discourse_id })
             @note.update(directory: @directory).tap do |note|
               raise Discourse::Errors::BaseError, 'Note entry could not be updated' unless note

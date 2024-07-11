@@ -4,6 +4,7 @@ module Discourse
   class DiscourseTopic < ActiveRecord::Base
     belongs_to :discourse_site
     belongs_to :directory
+    belongs_to :discourse_category
     belongs_to :note
 
     validates :topic_id, presence: true, uniqueness: { scope: :discourse_site_id }

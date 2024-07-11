@@ -61,6 +61,7 @@ module Discourse
         post_id = post_data['id']
         Discourse::DiscourseTopic.create(note: @note, topic_url:, topic_id:, post_id:,
                                          directory: @directory,
+                                         discourse_category: @directory.discourse_category,
                                          discourse_site: @discourse_site).tap do |topic|
           unless topic.persisted?
             raise Discourse::Errors::BaseError,
@@ -76,8 +77,8 @@ module Discourse
         "#{@base_url}/t/#{post_data['topic_slug']}/#{post_data['topic_id']}"
       end
 
-      def update_post(note, markdown)
-        @client.update_post(markdown:, post_id: note.post_id).tap do |response|
+      def update_post(note, markdown, discourse_topic)
+        @client.update_post(markdown:, post_id: discourse_topic.post_id).tap do |response|
           unless response
             raise Discourse::Errors::BaseError,
                   "Failed to update topic for #{note.title}"

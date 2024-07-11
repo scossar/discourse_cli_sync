@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_11_004806) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_11_044525) do
   create_table "directories", force: :cascade do |t|
     t.string "path", null: false
     t.integer "discourse_site_id"
@@ -59,7 +59,9 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_11_004806) do
     t.integer "note_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "discourse_category_id"
     t.index ["directory_id"], name: "index_discourse_topics_on_directory_id"
+    t.index ["discourse_category_id"], name: "index_discourse_topics_on_discourse_category_id"
     t.index ["discourse_site_id", "note_id"], name: "index_discourse_topics_on_discourse_site_id_and_note_id", unique: true
     t.index ["discourse_site_id", "post_id"], name: "index_discourse_topics_on_discourse_site_id_and_post_id", unique: true
     t.index ["discourse_site_id", "topic_id"], name: "index_discourse_topics_on_discourse_site_id_and_topic_id", unique: true
@@ -86,6 +88,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_11_004806) do
   add_foreign_key "directories", "discourse_sites"
   add_foreign_key "discourse_categories", "discourse_sites"
   add_foreign_key "discourse_topics", "directories"
+  add_foreign_key "discourse_topics", "discourse_categories"
   add_foreign_key "discourse_topics", "discourse_sites"
   add_foreign_key "discourse_topics", "notes"
   add_foreign_key "notes", "directories"
