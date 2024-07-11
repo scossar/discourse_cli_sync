@@ -52,6 +52,7 @@ module Discourse
 
           configure_category(dir)
 
+          # TODO: this needs updating
           Discourse::Utils::RecategorizeNotesFrame.call(directory: dir,
                                                         discourse_site: @discourse_site,
                                                         api_key: @api_key)

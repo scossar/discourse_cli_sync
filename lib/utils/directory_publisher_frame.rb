@@ -2,6 +2,7 @@
 
 require_relative 'note_publisher'
 require_relative 'ui_utils'
+require_relative '../models/note'
 
 module Discourse
   module Utils
@@ -24,8 +25,9 @@ module Discourse
           end
         end
 
-        def publish_directory(directory, require_confirmation)
+        def publish_directory(directory, _require_confirmation)
           paths = notes_for_directory(directory)
+          puts paths
 
           paths.each do |note_path|
             Discourse::Utils::NotePublisher.call(note_path:,
@@ -41,7 +43,8 @@ module Discourse
         end
 
         def notes_for_directory(directory)
-          Dir.glob(File.join(directory.path, '*.md'))
+          # Dir.glob(File.join(directory.path, '*.md'))
+          Discourse::Note.where(directory:).pluck(:full_path)
         end
 
         def short_path(directory)
