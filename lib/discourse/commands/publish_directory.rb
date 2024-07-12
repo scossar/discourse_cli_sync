@@ -17,15 +17,15 @@ module Discourse
         Discourse::Utils::InfoFrames.call(discourse_site:, api_key:)
         Discourse::Utils::CliUuid.call(discourse_site:)
         Discourse::Utils::NotesFrame.call(discourse_site:)
-        # Discourse::Utils::SiteTagFrame.call(discourse_site:, api_key:)
-        # root_directory, use_subdirectories = Discourse::Utils::DirectorySelectorFrame
-        #                                      .call(discourse_site:)
-        # directories = Discourse::Utils::TaxonomySelectorFrames.call(directory: root_directory,
-        #                                                             use_subdirectories:,
-        #                                                             api_key:,
-        #                                                             discourse_site:)
-        # Discourse::Utils::DirectoryPublisherFrame.call(root_directory:, directories:, api_key:,
-        #                                                discourse_site:)
+        Discourse::Utils::SiteTagFrame.call(discourse_site:, api_key:)
+        root_directory, use_subdirectories = Discourse::Utils::DirectorySelectorFrame
+                                             .call(discourse_site:)
+        directories = Discourse::Utils::TaxonomySelectorFrames.call(directory: root_directory,
+                                                                    use_subdirectories:,
+                                                                    api_key:,
+                                                                    discourse_site:)
+        Discourse::Utils::DirectoryPublisherFrame.call(root_directory:, directories:, api_key:,
+                                                       discourse_site:)
       end
 
       def self.help

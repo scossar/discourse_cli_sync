@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-# TODO: probably don't need notes here
-require_relative '../models/note'
 require_relative '../models/discourse_topic'
 require_relative 'update_tags_frame'
 

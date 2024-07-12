@@ -37,8 +37,9 @@ module Discourse
           CLI::UI::Prompt.confirm('Ask for confirmation before publishing each note?')
         end
 
+        # This isn't great but...
         def notes_for_directory(directory)
-          Discourse::Note.where(directory:)
+          Discourse::Note.where('path LIKE ?', directory.path)
         end
 
         def short_path(directory)

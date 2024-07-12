@@ -6,6 +6,7 @@ module Discourse
   class Note < ActiveRecord::Base
     validates :title, presence: true, uniqueness: true
     validates :file_id, presence: true, uniqueness: true
+    validates :path, presence: true
     validates :full_path, presence: true, uniqueness: true
     validates :local_only, inclusion: { in: [true, false] }
 
@@ -14,8 +15,9 @@ module Discourse
       local_only = params[:local_only] || false
       file_id = params[:file_id]
       full_path = params[:full_path]
+      path = params[:path]
 
-      Note.create(title:, local_only:, file_id:, full_path:).tap do |note|
+      Note.create(title:, local_only:, file_id:, full_path:, path:).tap do |note|
         unless note.persisted?
           raise Discourse::Errors::BaseError,
                 "Unable to create note for #{title}"

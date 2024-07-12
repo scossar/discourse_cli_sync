@@ -2,7 +2,6 @@
 
 require_relative '../models/directory'
 require_relative 'ui_utils'
-require_relative 'logger'
 
 module Discourse
   module Utils

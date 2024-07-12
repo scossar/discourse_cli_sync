@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[7.1].define(version: 2024_07_12_074436) do
+ActiveRecord::Schema[7.1].define(version: 2024_07_12_181231) do
   create_table "directories", force: :cascade do |t|
     t.string "path", null: false
     t.integer "discourse_site_id"
@@ -79,6 +79,7 @@ ActiveRecord::Schema[7.1].define(version: 2024_07_12_074436) do
     t.datetime "updated_at", null: false
     t.string "file_id"
     t.string "full_path", null: false
+    t.string "path", null: false
   end
 
   add_foreign_key "directories", "discourse_categories"

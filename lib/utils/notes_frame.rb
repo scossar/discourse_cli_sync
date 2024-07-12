@@ -5,6 +5,7 @@ require 'front_matter_parser'
 require_relative '../errors/errors'
 require_relative '../models/note'
 require_relative '../models/directory'
+require_relative 'logger'
 
 module Discourse
   module Utils
@@ -40,12 +41,14 @@ module Discourse
           title = File.basename(file, '.md')
           note = Discourse::Note.find_by(file_id: cli_uuid)
           group_title = spin_group_title(note, title)
+          path = File.dirname(file)
+          Discourse::Utils::Logger.debug("Note path: #{path}")
 
           spin_group.add(group_title) do
             if note
-              Discourse::Note.update_note(note, title:, full_path: file)
+              Discourse::Note.update_note(note, title:, full_path: file, path:)
             else
-              Discourse::Note.create_note(title:, file_id: cli_uuid, full_path: file)
+              Discourse::Note.create_note(title:, file_id: cli_uuid, full_path: file, path:)
             end
           end
           spin_group.wait
