@@ -40,6 +40,7 @@ module Discourse
       def handle_internal_links(markdown)
         internal_link_handler = InternalLinkHandler.new(api_key: @api_key,
                                                         note: @note,
+                                                        directory: @directory,
                                                         markdown:)
         internal_link_handler.handle
       end

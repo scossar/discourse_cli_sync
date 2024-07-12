@@ -16,9 +16,9 @@ module Discourse
           @directory = directory
           @discourse_site = @directory.discourse_site
 
-          @publisher = Discourse::Services::Publisher.new(note:, api_key:)
+          @publisher = Discourse::Services::Publisher.new(note:, directory:, api_key:)
           @title, _front_matter, @markdown = @publisher.parse_file
-          # TODO: can markdown be nil?
+          # TODO: can markdown be nil? I'd expect it to be an empty string if there's no content
           @markdown ||= ''
           publishing_frame(require_confirmation)
         end

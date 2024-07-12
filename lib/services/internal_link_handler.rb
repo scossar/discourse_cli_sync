@@ -8,11 +8,11 @@ require_relative '../utils/logger'
 module Discourse
   module Services
     class InternalLinkHandler
-      def initialize(api_key:, note:, markdown:)
+      def initialize(api_key:, note:, directory:, markdown:)
         @api_key = api_key
         @note = note
-        @discourse_site = @note.discourse_site
-        @directory = @note.directory
+        @directory = directory
+        @discourse_site = @directory.discourse_site
         @markdown = markdown
         @base_url = @discourse_site.base_url
         @internal_link_regex = /(?<!!)\[\[(.*?)\]\]/
