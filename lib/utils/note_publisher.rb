@@ -183,9 +183,6 @@ module Discourse
         def recategorize_topic(discourse_topic)
           @publisher.update_topic(discourse_topic.topic_id,
                                   { category_id: @directory.discourse_category.discourse_id })
-          discourse_topic.update(discourse_category: @directory.discourse_category).tap do |topic|
-            raise Discourse::Errors::BaseError, 'Note entry could not be updated' unless topic
-          end
         end
 
         def create_topic(spin_group)
