@@ -4,8 +4,6 @@ require_relative 'ask_password'
 require_relative 'encryption'
 require_relative '../models/discourse_site'
 
-require_relative 'logger'
-
 module Discourse
   module Utils
     class ApiCredentials
