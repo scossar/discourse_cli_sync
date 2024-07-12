@@ -4,6 +4,7 @@ require_relative '../errors/errors'
 require_relative '../models/note'
 require_relative '../models/discourse_topic'
 require_relative '../services/discourse_request'
+require_relative '../utils/ui_utils'
 
 module Discourse
   module Utils
@@ -11,7 +12,7 @@ module Discourse
       def initialize(discourse_site:, api_key:)
         @discourse_site = discourse_site
         @api_key = api_key
-        @site_tag = @discourse_site.site_tag
+        @site_tag = @discourse_site.site_tag || ''
         @client = Discourse::DiscourseRequest.new(@discourse_site, @api_key)
       end
 
@@ -30,8 +31,48 @@ module Discourse
         end
       end
 
+      def update_directory_topics(directory:, old_tags:)
+        short_path = Discourse::Utils::Ui.fancy_path(directory.path)
+        topics = Discourse::DiscourseTopic.where(directory:)
+        return unless topics.any?
+
+        CLI::UI::Frame.open("Updating directory tags for {{blue:#{short_path}}}") do
+          spin_group = CLI::UI::SpinGroup.new
+          spin_group.failure_debrief do |_title, exception|
+            puts CLI::UI.fmt "  #{exception}"
+          end
+
+          topics.each do |topic|
+            update_directory_topic(spin_group:, directory:, topic:, old_tags:)
+          end
+        end
+      end
+
       private
 
+      def update_directory_topic(spin_group:, directory:, topic:, old_tags:)
+        tags_arr, tags_str = topic_tags(directory:, topic:, old_tags:)
+        note = topic.note
+        spin_group
+          .add("Updating tags for {{green:#{note.title}}} to {{bold:#{tags_str}}}") do |spinner|
+          update_topic(discourse_topic: topic, tags: tags_arr)
+          spinner.update_title("Updated tags for {{green:#{note.title}}} to {{bold:#{tags_str}}}")
+        end
+        spin_group.wait
+      end
+
+      def topic_tags(directory:, topic:, old_tags:)
+        directory_tags = directory&.tags || ''
+        current_tags = topic&.tags || ''
+        old_tags_str = old_tags || ''
+        current_tags_arr = tags_to_array(current_tags)
+        current_tags_arr -= tags_to_array(old_tags_str)
+        current_tags_arr += tags_to_array(directory_tags)
+        tags_arr = current_tags_arr.uniq
+        [tags_arr, tags_arr.join('|')]
+      end
+
+      # TODO: fix name, this is specific to the site_tag
       def update_topic_tags(spin_group:, discourse_topic:, tags_to_add:, tags_to_remove:)
         note = discourse_topic.note
         new_tags_str = tags_to_string(tags_to_add)

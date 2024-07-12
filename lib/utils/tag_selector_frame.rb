@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require_relative 'ui_utils'
+require_relative 'update_tags_frame'
 
 module Discourse
   module Utils
@@ -30,16 +31,16 @@ module Discourse
         end
 
         def handle_configured_tags(short_path)
-          tags = @directory.tags
+          initial_tags = @directory.tags
           configuration_options = CLI::UI::Prompt
                                   .ask("{{blue:#{short_path}}} has been configured to tag " \
-                                       "notes published to Discourse with #{tags}.",
+                                       "notes published to Discourse with #{initial_tags}.",
                                        options: %w[keep change])
 
           return if configuration_options == 'keep'
 
           configure_tags(short_path)
-          # TODO: call method to update tags for existing topics
+          update_directory_topic_tags(initial_tags)
         end
 
         def configure_tags(short_path)
@@ -66,10 +67,10 @@ module Discourse
 
           return unless confirm_tags
 
-          directory_tags(tags_str)
+          update_directory_tags(tags_str)
         end
 
-        def directory_tags(tags_str)
+        def update_directory_tags(tags_str)
           @directory.update(tags: tags_str).tap do |response|
             unless response
               raise Discourse::Errors::BaseError,
@@ -78,6 +79,13 @@ module Discourse
           end
         rescue StandardError => e
           raise Discourse::Errors::BaseError, "Error updating tags: #{e.message}"
+        end
+
+        def update_directory_topic_tags(initial_tags)
+          tag_updater = Discourse::Utils::UpdateTagsFrame
+                        .new(discourse_site: @directory.discourse_site,
+                             api_key: @api_key)
+          tag_updater.update_directory_topics(directory: @directory, old_tags: initial_tags)
         end
       end
     end
