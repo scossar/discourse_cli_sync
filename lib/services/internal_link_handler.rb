@@ -40,14 +40,11 @@ module Discourse
 
       def find_linked_note(link_text)
         relative_path, title = parse_link(link_text)
-        note = if relative_path
-                 find_note_by_path(relative_path, title)
-               else
-                 # TODO: add a unique constraint to Notes for discourse_site_id/title
-                 Discourse::Note.find_by(title:)
-               end
-        Discourse::Utils::Logger.debug("note: #{note}")
-        note
+        if relative_path
+          find_note_by_path(relative_path, title)
+        else
+          Discourse::Note.find_by(title:)
+        end
       end
 
       def linked_note_topic_url(linked_note)
