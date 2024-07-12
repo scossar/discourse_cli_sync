@@ -1,6 +1,8 @@
 # frozen_string_literal: true
 
+# TODO: probably don't need notes here
 require_relative '../models/note'
+require_relative '../models/discourse_topic'
 require_relative 'update_tags_frame'
 
 module Discourse
@@ -9,6 +11,7 @@ module Discourse
       class << self
         def call(discourse_site:, api_key:)
           @discourse_site = discourse_site
+          @initial_site_tag = @discourse_site&.site_tag
           @api_key = api_key
           @tag_regex = /^[\w-]{3,20}$/
           tag_frame
@@ -17,10 +20,9 @@ module Discourse
         private
 
         def tag_frame
-          site_tag = @discourse_site&.site_tag
           CLI::UI::Frame.open("Site tag for {{blue:#{@discourse_site.domain}}}") do
-            if site_tag
-              confirm_site_tag(site_tag)
+            if @initial_site_tag
+              confirm_site_tag(@initial_site_tag)
             else
               set_site_tag
             end
@@ -59,19 +61,32 @@ module Discourse
             break if confirm
           end
           site_tag = tag.empty? ? nil : tag
-          @discourse_site.update(site_tag:)
+          update_site_tag(site_tag)
+        end
+
+        def update_site_tag(site_tag)
+          @discourse_site.update(site_tag:).tap do |response|
+            raise Discourse::Errors::BaseError, 'Unable to update site_tag' unless response
+          end
+        rescue StandardError => e
+          raise Discourse::Errors::BaseError, "Error updating site_tag: #{e.message}"
         end
 
         def update_topic_tags
-          published_notes = Discourse::Note.all
-          return unless published_notes.any?
+          topics = Discourse::DiscourseTopic.where(discourse_site: @discourse_site)
+          return unless topics.any?
 
+          # TODO: handle the case of wanting to remove the site tag from all update_topics
+          # without setting a new one
           update_topics = CLI::UI::Prompt
-                          .confirm("Add {{bold:#{@discourse_site.site_tag}}} to existing topics?")
+                          .confirm('Change site tag for existing topics to  ' \
+                                   "{{bold:#{@discourse_site.site_tag}}}?")
 
           return unless update_topics
 
-          Discourse::Utils::UpdateTagsFrame.call(discourse_site: @discourse_site, api_key: @api_key)
+          tag_updater = Discourse::Utils::UpdateTagsFrame.new(discourse_site: @discourse_site,
+                                                              api_key: @api_key)
+          tag_updater.update_site_tag(topics:, old_site_tag: @initial_site_tag)
         end
 
         def tag_confirm_prompt(tag)
