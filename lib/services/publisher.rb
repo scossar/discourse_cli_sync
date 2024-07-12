@@ -17,6 +17,7 @@ module Discourse
         @directory = directory
         @api_key = api_key
         @discourse_site = @directory.discourse_site
+        @base_url = @discourse_site.base_url
         @client = DiscourseRequest.new(@discourse_site, api_key)
         @topic_tags_arr, @topic_tags_str = topic_tags
       end
@@ -113,8 +114,8 @@ module Discourse
       end
 
       def topic_tags
-        site_tags = @discourse_site.site_tag.split('|')
-        directory_tags = @directory.tags.split('|')
+        site_tags = @discourse_site&.site_tag ? @discourse_site.site_tag.split('|') : []
+        directory_tags = @directory&.tags ? @directory.tags.split('|') : []
         tags_arr = site_tags + directory_tags
         tags_str = tags_arr.join('|')
         [tags_arr, tags_str]

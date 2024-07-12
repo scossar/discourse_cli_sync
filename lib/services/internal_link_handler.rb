@@ -39,16 +39,13 @@ module Discourse
       private
 
       def find_linked_note(link_text)
-        relative_path, title = parse_link(link_text)
-        if relative_path
-          find_note_by_path(relative_path, title)
-        else
-          Discourse::Note.find_by(title:)
-        end
+        _relative_path, title = parse_link(link_text)
+        Discourse::Note.find_by(title:)
       end
 
       def linked_note_topic_url(linked_note)
         linked_note_topic = Discourse::DiscourseTopic.find_by(note: linked_note)
+        Discourse::Utils::Logger.debug("Linked note topic_url: #{linked_note_topic&.topic_url}")
         topic_url = linked_note_topic&.topic_url
         topic_url || placeholder_topic(linked_note)
       end
