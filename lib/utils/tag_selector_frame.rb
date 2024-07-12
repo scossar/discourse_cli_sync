@@ -34,7 +34,8 @@ module Discourse
           initial_tags = @directory.tags
           configuration_options = CLI::UI::Prompt
                                   .ask("{{blue:#{short_path}}} has been configured to tag " \
-                                       "notes published to Discourse with #{initial_tags}.",
+                                       'notes published to Discourse with  ' \
+                                       "'#{comma_separated_tags(initial_tags)}'.",
                                        options: %w[keep change])
 
           return if configuration_options == 'keep'
@@ -54,20 +55,22 @@ module Discourse
             confirm = CLI::UI::Prompt.confirm("Is '#{tag}' correct?")
             tags << tag if confirm
 
-            progress = CLI::UI::Prompt.ask("Current tags: #{tags.join('|')}. Add more tags?",
+            progress = CLI::UI::Prompt.ask("Current tags: '#{tags.join(', ')}'. Add more tags?",
                                            options: ['yes', 'no', 'start over'])
             break if progress == 'no'
 
             tags = [] if progress == 'start over'
           end
-          tags_str = tags.join('|')
           confirm_tags = CLI::UI::Prompt
-                         .confirm("Selected tags: #{tags_str}. Tag notes " \
-                                  "published from {{blue:#{short_path}}} with #{tags_str}?")
+                         .confirm("Selected tags: '#{tags.join(', ')}'. Is that correct?")
 
           return unless confirm_tags
 
-          update_directory_tags(tags_str)
+          update_directory_tags(tags.join('|'))
+        end
+
+        def comma_separated_tags(tags_str)
+          tags_str.split('|').join(', ')
         end
 
         def update_directory_tags(tags_str)
