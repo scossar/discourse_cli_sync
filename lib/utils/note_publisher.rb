@@ -18,8 +18,6 @@ module Discourse
 
           @publisher = Discourse::Services::Publisher.new(note:, directory:, api_key:)
           @title, _front_matter, @markdown = @publisher.parse_file
-          # TODO: can markdown be nil? I don't think so
-          @markdown ||= ''
           publishing_frame(require_confirmation)
         end
 

@@ -23,7 +23,7 @@ module Discourse
         link_adjusted = @markdown.gsub(@internal_link_regex) do |link_match|
           link_text = link_match.match(@internal_link_regex)[1]
           linked_note = find_linked_note(link_text)
-          break unless linked_note
+          next unless linked_note
 
           topic_url = linked_note_topic_url(linked_note)
           internal_links << linked_note.title
@@ -45,7 +45,6 @@ module Discourse
 
       def linked_note_topic_url(linked_note)
         linked_note_topic = Discourse::DiscourseTopic.find_by(note: linked_note)
-        Discourse::Utils::Logger.debug("Linked note topic_url: #{linked_note_topic&.topic_url}")
         topic_url = linked_note_topic&.topic_url
         topic_url || placeholder_topic(linked_note)
       end

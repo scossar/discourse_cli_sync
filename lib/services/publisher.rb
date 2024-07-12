@@ -7,6 +7,7 @@ require_relative '../errors/errors'
 require_relative 'internal_link_handler'
 require_relative 'discourse_request'
 require_relative '../models/discourse_topic'
+require_relative '../utils/logger'
 
 module Discourse
   module Services
@@ -14,6 +15,7 @@ module Discourse
       def initialize(note:, directory:, api_key:)
         @note = note
         @note_path = @note.full_path
+        Discourse::Utils::Logger.debug("note title: #{note.title}, full_path: #{@note_path}")
         @directory = directory
         @api_key = api_key
         @discourse_site = @directory.discourse_site

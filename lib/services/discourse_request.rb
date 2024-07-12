@@ -23,7 +23,7 @@ module Discourse
     end
 
     def update_post(markdown:, post_id:)
-      params = { post: { raw: markdown, skip_validations: true } }
+      params = { post: { raw: markdown }, skip_validations: true }
       @faraday_client.put("/posts/#{post_id}.json", params)
     end
 
