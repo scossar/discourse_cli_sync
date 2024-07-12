@@ -4,7 +4,7 @@ require_relative '../errors/errors'
 
 module Discourse
   class Directory < ActiveRecord::Base
-    has_many :notes
+    has_many :discourse_topics, dependent: :destroy
     belongs_to :discourse_site
     belongs_to :discourse_category, optional: true
 
