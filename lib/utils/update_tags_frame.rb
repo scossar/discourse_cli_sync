@@ -23,10 +23,10 @@ module Discourse
             puts CLI::UI.fmt "  #{exception}"
           end
           topics.each do |topic|
-            update_topic_tags(spin_group:,
-                              discourse_topic: topic,
-                              tags_to_add: tags_to_array(@site_tag),
-                              tags_to_remove: tags_to_array(old_site_tag))
+            update_topic_site_tag(spin_group:,
+                                  discourse_topic: topic,
+                                  tags_to_add: tags_to_array(@site_tag),
+                                  tags_to_remove: tags_to_array(old_site_tag))
           end
         end
       end
@@ -51,7 +51,7 @@ module Discourse
       private
 
       def update_directory_topic(spin_group:, directory:, topic:, old_tags:)
-        tags_arr, tags_str = topic_tags(directory:, topic:, old_tags:)
+        tags_arr, tags_str = directory_topic_tags(directory:, topic:, old_tags:)
         note = topic.note
         spin_group
           .add("Updating tags for {{green:#{note.title}}} to {{bold:#{tags_str}}}") do |spinner|
@@ -61,7 +61,7 @@ module Discourse
         spin_group.wait
       end
 
-      def topic_tags(directory:, topic:, old_tags:)
+      def directory_topic_tags(directory:, topic:, old_tags:)
         directory_tags = directory&.tags || ''
         current_tags = topic&.tags || ''
         old_tags_str = old_tags || ''
@@ -72,12 +72,11 @@ module Discourse
         [tags_arr, tags_arr.join('|')]
       end
 
-      # TODO: fix name, this is specific to the site_tag
-      def update_topic_tags(spin_group:, discourse_topic:, tags_to_add:, tags_to_remove:)
+      def update_topic_site_tag(spin_group:, discourse_topic:, tags_to_add:, tags_to_remove:)
         note = discourse_topic.note
         new_tags_str = tags_to_string(tags_to_add)
         current_tags = tags_to_array(discourse_topic.tags)
-        tags = consolidate_tags(current_tags:, tags_to_add:, tags_to_remove:)
+        tags = consolidate_site_tags(current_tags:, tags_to_add:, tags_to_remove:)
         spin_group.add("Adding {{bold:#{new_tags_str}}} to {{green:#{note.title}}}") do |spinner|
           update_topic(discourse_topic:, tags:)
           update_discourse_topic_entry(discourse_topic:, tags:)
@@ -86,7 +85,7 @@ module Discourse
         spin_group.wait
       end
 
-      def consolidate_tags(current_tags:, tags_to_add:, tags_to_remove:)
+      def consolidate_site_tags(current_tags:, tags_to_add:, tags_to_remove:)
         updated_tags = current_tags + tags_to_add
         updated_tags -= tags_to_remove
         updated_tags.uniq
