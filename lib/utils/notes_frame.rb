@@ -39,13 +39,11 @@ module Discourse
           cli_uuid = front_matter[@note_uuid_key]
           title = File.basename(file, '.md')
           note = Discourse::Note.find_by(file_id: cli_uuid)
-          file_path = File.dirname(file)
-          directory = @directories.find_by(path: file_path)
           group_title = spin_group_title(note, title)
 
           spin_group.add(group_title) do
             if note
-              Discourse::Note.update_note(note, title:, directory:, full_path: file)
+              Discourse::Note.update_note(note, title:, full_path: file)
             else
               Discourse::Note.create_note(title:, file_id: cli_uuid, full_path: file)
             end

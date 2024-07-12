@@ -4,9 +4,9 @@ require_relative '../errors/errors'
 
 module Discourse
   class Note < ActiveRecord::Base
-    validates :title, presence: true, uniqueness: { scope: :directory_id }
-    validates :file_id, presence: true, uniqueness: { scope: :discourse_site_id }
-    validates :full_path, presence: true, uniqueness: { scope: :discourse_site_id }
+    validates :title, presence: true, uniqueness: true
+    validates :file_id, presence: true, uniqueness: true
+    validates :full_path, presence: true, uniqueness: true
     validates :local_only, inclusion: { in: [true, false] }
 
     def self.create_note(params)
@@ -16,7 +16,10 @@ module Discourse
       full_path = params[:full_path]
 
       Note.create(title:, local_only:, file_id:, full_path:).tap do |note|
-        raise Discourse::Errors::BaseError, 'Unable to create Note' unless note.persisted?
+        unless note.persisted?
+          raise Discourse::Errors::BaseError,
+                "Unable to create note for #{title}"
+        end
       end
     rescue StandardError => e
       raise Discourse::Errors::BaseError, "Error creating Note: #{e.message}"
