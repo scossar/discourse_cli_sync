@@ -11,10 +11,10 @@ module Discourse
   module Utils
     class NotePublisher
       class << self
-        def call(note:, api_key:, require_confirmation: false)
+        def call(note:, directory:, api_key:, require_confirmation: false)
           @note = note
-          @discourse_site = @note.discourse_site
-          @directory = @note.directory
+          @directory = directory
+          @discourse_site = @directory.discourse_site
 
           @publisher = Discourse::Services::Publisher.new(note:, api_key:)
           @title, _front_matter, @markdown = @publisher.parse_file

@@ -29,7 +29,8 @@ module Discourse
           notes = notes_for_directory(directory)
 
           notes.each do |note|
-            Discourse::Utils::NotePublisher.call(note:, api_key: @api_key, require_confirmation:)
+            Discourse::Utils::NotePublisher.call(note:, directory:, api_key: @api_key,
+                                                 require_confirmation:)
           end
         end
 

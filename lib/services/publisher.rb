@@ -11,12 +11,12 @@ require_relative '../models/discourse_topic'
 module Discourse
   module Services
     class Publisher
-      def initialize(note:, api_key:)
+      def initialize(note:, directory:, api_key:)
         @note = note
         @note_path = @note.full_path
-        @directory = @note.directory
+        @directory = directory
         @api_key = api_key
-        @discourse_site = @note.discourse_site
+        @discourse_site = @directory.discourse_site
         @client = DiscourseRequest.new(@discourse_site, api_key)
         @topic_tags_arr, @topic_tags_str = topic_tags
       end
