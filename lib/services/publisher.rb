@@ -15,7 +15,6 @@ module Discourse
       def initialize(note:, directory:, api_key:)
         @note = note
         @note_path = @note.full_path
-        Discourse::Utils::Logger.debug("note title: #{note.title}, full_path: #{@note_path}")
         @directory = directory
         @api_key = api_key
         @discourse_site = @directory.discourse_site
