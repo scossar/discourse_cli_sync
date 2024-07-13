@@ -18,6 +18,7 @@ module Discourse
     end
 
     def update_topic(topic_id:, params:)
+      params[:skip_validations] = true
       path = "/t/-/#{topic_id}.json"
       @faraday_client.put(path, params)
     end

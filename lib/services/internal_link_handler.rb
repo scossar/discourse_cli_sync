@@ -44,7 +44,8 @@ module Discourse
       end
 
       def linked_note_topic_url(linked_note)
-        linked_note_topic = Discourse::DiscourseTopic.find_by(note: linked_note)
+        linked_note_topic = Discourse::DiscourseTopic.find_by(note: linked_note,
+                                                              discourse_site: @discourse_site)
         topic_url = linked_note_topic&.topic_url
         topic_url || placeholder_topic(linked_note)
       end

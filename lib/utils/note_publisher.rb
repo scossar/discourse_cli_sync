@@ -151,7 +151,8 @@ module Discourse
         end
 
         def publish_task(spin_group)
-          discourse_topic = Discourse::DiscourseTopic.find_by(note: @note)
+          discourse_topic = Discourse::DiscourseTopic.find_by(note: @note,
+                                                              discourse_site: @discourse_site)
           if discourse_topic
             update_post(spin_group, discourse_topic)
             update_topic(spin_group, discourse_topic)
